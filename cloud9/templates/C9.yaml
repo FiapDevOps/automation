@@ -1,0 +1,135 @@
+# /*
+# Create a Cloud9 environment as a launcher platform to create another stuffs
+# Based on https://github.com/awslabs/aws-cloudformation-templates
+# Adapted from original file: https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/services/Cloud9/C9.yaml
+# */
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Cloud9 Environment with AWS CodeCommit Repository
+
+Parameters:
+
+  EC2InstanceType:
+    Description: EC2 instance type on which IDE runs
+    Type:        String
+    Default:     t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+
+  AutoHibernateTimeout:
+    Description:  How many minutes idle before shutting down the IDE. Options, 30min, 1hr, 4hr, 1day, 1week, Never (0)
+    Type:         Number
+    Default:      240
+    AllowedValues:
+      - 30
+      - 60
+      - 240
+      - 1440
+      - 10080
+      - 0
+
+  RM:
+    Description:    Please specify your RM (only numbers), it will be used for tagging and resource names. Mandatory LOWER CASE.
+    Type:           String
+    Default:        "12345"
+
+  User:
+    Description:    Please specify the User.
+    Type:           String
+
+  Password:
+    NoEcho: 'true'
+    Type: String
+    Description: New account password
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters
+
+  RepositoryName:
+    Description:    CodeCommit Repository Name
+    Type:           String
+    Default:        'scripting'
+
+Resources:
+
+  CFNUser:
+    Type: AWS::IAM::User
+    Properties:
+      LoginProfile:
+        Password: !Ref 'Password'
+
+  CFNUserGroup:
+    Type: AWS::IAM::Group
+  
+  CFNAdminGroup:
+    Type: AWS::IAM::Group
+  Users:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref 'CFNUserGroup'
+      Users: [!Ref 'CFNUser']
+  
+  Admins:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref 'CFNAdminGroup'
+      Users: [!Ref 'CFNUser']
+  
+  CFNUserPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CFNUsers
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: ['cloudformation:Describe*', 'cloudformation:List*', 'cloudformation:Get*']
+          Resource: '*'
+      Groups: [!Ref 'CFNUserGroup']
+  
+  CFNAdminPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CFNAdmins
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: cloudformation:*
+          Resource: '*'
+      Groups: [!Ref 'CFNAdminGroup']
+  
+  CFNKeys:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref 'CFNUser'
+
+  C9IDE:
+    Type: 'AWS::Cloud9::EnvironmentEC2'
+    Properties:
+      Name: !Sub '${User}-rm-${RM}-Cloud9-IDE'
+      Description: !Sub '${User} Cloud9 IDE'
+      AutomaticStopTimeMinutes: !Ref 'AutoHibernateTimeout'
+      InstanceType: !Ref 'EC2InstanceType'
+      ImageId: 'resolve:ssm:/aws/service/cloud9/amis/ubuntu-18.04-x86_64'
+      Repositories:
+          - RepositoryUrl: !Sub 'https://git-codecommit.us-west-2.amazonaws.com/v1/repos/${RepositoryName}'
+            PathComponent: !Sub 'codecommit/${RepositoryName}'
+
+Outputs:
+
+  Cloud9URL:
+    Description: Cloud9 Environment
+    Value:
+      Fn::Join:
+      - ''
+      - - !Sub https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/
+        - !Ref 'C9IDE'
+
+  AccessKey:
+    Value: !Ref 'CFNKeys'
+    Description: AWSAccessKeyId of new user
+
+  SecretKey:
+    Value: !GetAtt [CFNKeys, SecretAccessKey]
+    Description: AWSSecretAccessKey of new user
