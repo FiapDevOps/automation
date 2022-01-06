@@ -1,0 +1,2 @@
+# Exemplo com um playbook basico para entrega de instancias via provisionamento na AWS;
+- import_playbook: sample.yml

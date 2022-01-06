@@ -54,55 +54,55 @@ Parameters:
 
 Resources:
 
-  CFNUser:
+  FiapUser:
     Type: AWS::IAM::User
     Properties:
       LoginProfile:
         Password: !Ref 'Password'
 
-  CFNUserGroup:
+  FiapUserGroup:
     Type: AWS::IAM::Group
   
-  CFNAdminGroup:
+  FiapAdminGroup:
     Type: AWS::IAM::Group
   Users:
     Type: AWS::IAM::UserToGroupAddition
     Properties:
-      GroupName: !Ref 'CFNUserGroup'
-      Users: [!Ref 'CFNUser']
+      GroupName: !Ref 'FiapUserGroup'
+      Users: [!Ref 'FiapUser']
   
   Admins:
     Type: AWS::IAM::UserToGroupAddition
     Properties:
-      GroupName: !Ref 'CFNAdminGroup'
-      Users: [!Ref 'CFNUser']
+      GroupName: !Ref 'FiapAdminGroup'
+      Users: [!Ref 'FiapUser']
   
-  CFNUserPolicies:
+  FiapUserPolicies:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: CFNUsers
+      PolicyName: FiapUsers
       PolicyDocument:
         Statement:
         - Effect: Allow
           Action: ['cloudformation:Describe*', 'cloudformation:List*', 'cloudformation:Get*']
           Resource: '*'
-      Groups: [!Ref 'CFNUserGroup']
+      Groups: [!Ref 'FiapUserGroup']
   
-  CFNAdminPolicies:
+  FiapAdminPolicies:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: CFNAdmins
+      PolicyName: FiapAdmins
       PolicyDocument:
         Statement:
         - Effect: Allow
           Action: cloudformation:*
           Resource: '*'
-      Groups: [!Ref 'CFNAdminGroup']
+      Groups: [!Ref 'FiapAdminGroup']
   
-  CFNKeys:
+  FiapKeys:
     Type: AWS::IAM::AccessKey
     Properties:
-      UserName: !Ref 'CFNUser'
+      UserName: !Ref 'FiapUser'
 
   C9IDE:
     Type: 'AWS::Cloud9::EnvironmentEC2'
@@ -111,7 +111,6 @@ Resources:
       Description: !Sub '${User} Cloud9 IDE'
       AutomaticStopTimeMinutes: !Ref 'AutoHibernateTimeout'
       InstanceType: !Ref 'EC2InstanceType'
-      ImageId: 'resolve:ssm:/aws/service/cloud9/amis/ubuntu-18.04-x86_64'
       Repositories:
           - RepositoryUrl: !Sub 'https://git-codecommit.us-west-2.amazonaws.com/v1/repos/${RepositoryName}'
             PathComponent: !Sub 'codecommit/${RepositoryName}'
@@ -127,9 +126,9 @@ Outputs:
         - !Ref 'C9IDE'
 
   AccessKey:
-    Value: !Ref 'CFNKeys'
+    Value: !Ref 'FiapKeys'
     Description: AWSAccessKeyId of new user
 
   SecretKey:
-    Value: !GetAtt [CFNKeys, SecretAccessKey]
+    Value: !GetAtt [FiapKeys, SecretAccessKey]
     Description: AWSSecretAccessKey of new user
