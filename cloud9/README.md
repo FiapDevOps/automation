@@ -1,6 +1,16 @@
 # DEVOPS Enginnering
 
 Nesta configuração você fará a preparação da instância que utilizaremos para os laboratórios envolvendo o ambiente AWS;
+
+## Processo via automação:
+
+Para configurar automaticamente faça o login na conta da AWS indicada pelo Professor e acesse o pefil "DeployEnvironment", e em seguida clique no link abaixo para disparar o template de automação:
+
+[![cf-template](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/new?stackName=create-sandbox&templateURL=https://s3.us-east-2.amazonaws.com/cf-templates-fiaplabs-automation/C9.yml)
+
+
+Verifique as informações de acesso na guia "Outputs" dentro da Stack;
+
 ## 1. Configurando a instância de trabalho com Cloud9
 
 1.1. Acesse a conta destinada ao laboratório conforme os dados enviados por e-mail, no painel de serviços da AWS, utilize a barra de busca na área superior para localizar e selecionar o serviço Cloud9:
