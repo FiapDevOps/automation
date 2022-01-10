@@ -1,0 +1,20 @@
+# Webserver Playbook
+
+# https://docs.ansible.com/ansible/latest/user_guide/connection_details.html
+
+- name: Webserver | Install nginx
+  hosts: webservers
+  become: true
+  remote_user: ubuntu
+
+  tasks:
+  - name: Webserver | Update cache and install Nginx
+    apt:
+      name: nginx
+      state: latest
+      update_cache: yes
+
+  - name: Webserver | Start NGiNX service
+    service:
+      name: nginx
+      state: started
