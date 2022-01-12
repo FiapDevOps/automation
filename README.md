@@ -8,6 +8,7 @@ Repositório com as bases no conteúdo da disciplina "Server Managing, Monitorin
 | Laboratório       | Descrição |
 |-------------------|-----------|
 | [Cloud9](https://github.com/fiapdevops/automation/tree/main/cloud9) | Preparação da IDE como plataform de lançamento para os próximos exemplos; |
+| [Ansible](https://github.com/fiapdevops/automation/tree/main/ansible) | Automação baseada em ansible para provisionamento e gerenciament ode configuração |
 | [Terraform](https://github.com/fiapdevops/automation/tree/main/terraform) | Apresentando o conceito de orquestração com terraform em ambiente AWS; |
 
 ---

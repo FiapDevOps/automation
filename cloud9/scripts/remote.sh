@@ -35,8 +35,8 @@ aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp --port 0-65535 --source-group $SG_NAME
 
 # Regras para ICMP
-aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol icmp --port -1 $REMOTE_PUBLIC_IP/32
-aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --source-group $SG_NAME
 
 
