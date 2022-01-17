@@ -3,6 +3,7 @@
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_ami_info_module.html
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_vpc_net_info_module.html
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_vpc_subnet_info_module.html
+# https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_module.html
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/debug_module.html
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
 
