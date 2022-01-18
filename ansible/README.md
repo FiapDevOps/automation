@@ -224,8 +224,7 @@ ansible-playbook site.yml -i inventory_aws_ec2.yml -v
 
 ---
 
-
-Para usar o inventário 
+Com esta configuração o ansible fara a iteração sobre as duas instâncias inventariadas de acordo com a tag env:staging;
 
 ---
 
