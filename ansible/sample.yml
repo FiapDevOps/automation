@@ -3,44 +3,56 @@
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_ami_info_module.html
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_vpc_net_info_module.html
 # https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_vpc_subnet_info_module.html
+# https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_module.html
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/debug_module.html
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
 
 - hosts: localhost
   connection: local
   gather_facts: False
+  vars:
+    aws_region: us-west-2
 
   tasks:
-    - name: Launch | Gather information about Ubuntu 20.04 AMIs published by Canonical (099720109477)
+    - name: Sample | Gather information about RHEL 7 AMIs published by Canonical (309956199498)
       amazon.aws.ec2_ami_info:
-        owners: 099720109477
+        owners: 309956199498
+        region: "{{ aws_region }}"
         filters:
-          name: "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+          name: "RHEL-7.?*GA*"
       register: ec2_ami_info
 
-    - name: Launch | Select the latest AMI
+    #- name: Sample | Gather information about Ubuntu 20.04 AMIs published by Canonical (099720109477)
+    #  amazon.aws.ec2_ami_info:
+    #    owners: 099720109477
+    #    region: "{{ aws_region }}"
+    #    filters:
+    #      name: "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+    #  register: ec2_ami_info
+
+    - name: Sample | Select the latest AMI
       set_fact:
         ec2_ami_latest: >
           {{ ec2_ami_info.images | sort(attribute='creation_date') | last }} 
 
-    - name: Launch | Gather information about VPC
+    - name: Sample | Gather information about VPC
       amazon.aws.ec2_vpc_net_info:
+        region: "{{ aws_region }}"
       register: ec2_vpc_net_info
       
-    - name: Launch | Gather information about Subnet
+    - name: Sample | Gather information about Subnet
       amazon.aws.ec2_vpc_subnet_info:
+        region: "{{ aws_region }}"
         filters:
           vpc-id: "{{ ec2_vpc_net_info.vpcs[0].vpc_id }}"
       register: ec2_vpc_subnet_info
       
-    # How to debug facts and runtime information
-    #- name: Launch | Debug print out informations to terminal
-    #  debug:
-    #    var: vpc_subnet_info
-
     # Basic example with tagging and CloudWatch
-    - name: Launch | Create one single instance
+    - name: Sample | Create one single instance
       amazon.aws.ec2:
         key_name: id_lab
         group: default
+        region: "{{ aws_region }}"
         instance_type: t2.micro
         image: "{{ ec2_ami_latest.image_id }}"
         wait: yes
@@ -51,3 +63,11 @@
         monitoring: yes
         vpc_subnet_id: "{{ ec2_vpc_subnet_info.subnets[0].subnet_id }}"
         assign_public_ip: yes
+      register: ec2_launch_result_info
+  
+    # How to debug facts and runtime information
+    - name: Sample | Debug print out informations to terminal
+      ansible.builtin.debug:
+        msg:
+          - "The provisioned instance internal ip address is: {{ ec2_launch_result_info.instances[0].private_ip }}"
+          - "The provisioned instance private dns name is: {{ ec2_launch_result_info.instances[0].private_dns_name }}"

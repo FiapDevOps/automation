@@ -7,8 +7,8 @@
 
 printf "Criando chave para o acesso remoto \n"
 
-test -f $HOME/environment/info/id_lab.pem || aws ec2 create-key-pair --key-name "id_lab" | jq -r ".KeyMaterial" > $HOME/environment/info/id_lab.pem && chmod 600 $HOME/environment/info/id*
-test -f $HOME/environment/info/id_lab.pub || ssh-keygen -y -f $HOME/environment/info/id_lab.pem > $HOME/environment/info/id_lab.pub
+test -f $HOME/environment/info/id_lab.pem || aws ec2 create-key-pair --key-name id_lab --key-type rsa | jq -r ".KeyMaterial" > $HOME/environment/info/id_lab.pem && chmod 600 $HOME/environment/info/id* | cp -p $HOME/environment/info/id_lab.pem $HOME/.ssh/id_rsa 
+test -f $HOME/environment/info/id_lab.pub || ssh-keygen -y -f $HOME/environment/info/idlab.pem > $HOME/environment/info/id_lab.pub
 
 export PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
 export PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
@@ -35,8 +35,8 @@ aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp --port 0-65535 --source-group $SG_NAME
 
 # Regras para ICMP
-aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol icmp --port -1 $REMOTE_PUBLIC_IP/32
-aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --source-group $SG_NAME
 
 
