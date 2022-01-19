@@ -25,7 +25,7 @@ terraform {
 data "aws_vpc" "my_vpc" {
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Environment = "lab"
   }
 }
 
@@ -39,7 +39,7 @@ module "web_server_sg" {
 
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Environment = "lab"
     Tier = "FE"
   }
 

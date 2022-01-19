@@ -101,6 +101,7 @@ Resources:
         - Effect: Allow
           Action: [
             "ec2:CreateVpc",
+            "ec2:DescribeVpcs",
             "ec2:DescribeAddresses",
             "ec2:DescribeClassicLinkInstances",
             "ec2:DescribeCustomerGateways",
@@ -154,6 +155,7 @@ Resources:
         - Effect: Allow
           Action: [
             "ec2:RunInstances",
+            "ec2:DescribeRegions",
             "ec2:TerminateInstances",
             "ec2:CreateTags",
             "ec2:DescribeInstances",
@@ -197,9 +199,6 @@ Resources:
       Description: !Sub '${User} Cloud9 IDE'
       AutomaticStopTimeMinutes: !Ref 'AutoHibernateTimeout'
       InstanceType: !Ref 'EC2InstanceType'
-      Repositories:
-          - RepositoryUrl: !Sub 'https://git-codecommit.us-west-2.amazonaws.com/v1/repos/${RepositoryName}'
-            PathComponent: !Sub 'codecommit/${RepositoryName}'
 
 Outputs:
 
@@ -211,10 +210,10 @@ Outputs:
       - - !Sub https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/
         - !Ref 'C9IDE'
 
-  AWS_ACCESS_KEY_ID:
+  AwsAccessKeyID:
     Value: !Ref 'FiapKeys'
     Description: AWSAccessKeyId of new user
 
-  AWS_SECRET_ACCESS_KEY:
+  AwsSecretAccessKey:
     Value: !GetAtt [FiapKeys, SecretAccessKey]
     Description: AWSSecretAccessKey of new user

@@ -52,13 +52,22 @@ Nesta etapa faremos algumas configurações na instância de onde partirá as au
 2.1. Após finalizar o processo anterior um terminal será exibido dentro do Cloud9, faça uma cópia do [repositório git do laboratório](https://github.com/fiapdevops/automation) da disciplina;
 
 ```sh
+cd ~/environment
 git clone https://github.com/fiapdevops/automation
 ```
 
 2.2. Execute o script de instalção das ferramentas que serão usadas durante os laboratórios:
 
 ```sh
-sudo bash -x $HOME/environment/automation/cloud9/scripts/config.sh
+chmod +x ~/environment/automation/cloud9/scripts/*.sh
+
+~/environment/automation/cloud9/scripts/config.sh
+```
+
+2.3. Após a configuração execute o script de criação das chaves de SSH, elas serão necessário para acesso entre o host do cloud9 e as instâncias que criaremos noas laboratórios;
+
+```sh
+~/environment/automation/cloud9/scripts/remote.sh
 ```
 
 ##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps

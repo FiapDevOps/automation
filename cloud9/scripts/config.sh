@@ -8,7 +8,7 @@ curl -s http://169.254.169.254/latest/meta-data/public-hostname -o $HOME/environ
 
 
 # Resizing para o disco local do ambiente:
-sh $HOME/environment/codecommit/scripting/resize.sh 20 > /dev/null
+sh $HOME/environment/automation/cloud9/scripts/resize.sh 20 > /dev/null
 
 # Instalação de componentes:
 printf "\n Configurando Dependencias \n"
@@ -29,6 +29,9 @@ printf "\n Instalando o ansible via pip \n"
 sudo python -m pip install --upgrade pip
 pip install ansible boto3 boto
 
+printf "\n Gravando alterações no .bashrc \n"
+echo "export AWS_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)" >> $HOME/.bashrc
+echo "export ANSIBLE_HOST_KEY_CHECKING=False" >> $HOME/.bashrc
+
 printf "\n Configurando Enviroment Env \n"
-echo "AWS_REGION=us-east-2" >> $HOME/.bashrc
-source $HOME/.bashrc
+bash

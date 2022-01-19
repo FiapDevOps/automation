@@ -15,7 +15,7 @@ provider "aws" {
 data "aws_vpc" "my_vpc" {
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Environment = "lab"
   }
 }
 
@@ -23,7 +23,7 @@ data "aws_security_group" "selected" {
   vpc_id      = data.aws_vpc.my_vpc.id
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Environment = "lab"
     Tier = "FE"
   }
 }
@@ -38,7 +38,7 @@ data "aws_subnet_ids" "selected" {
 
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Environment = "lab"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_instance" "web_app" {
     tags = {
         Name        = "mediawiki"
         Terraform   = "true"
-        Environment = "dev"
+        Environment = "lab"
         Tier        = "public"
     }
 }
