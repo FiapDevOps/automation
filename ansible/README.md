@@ -24,7 +24,7 @@ Com a configuração finalizada dentro do diretório automation/ansible (Uma có
 
 ```sh
 cd ~/environment/automation/ansible
-ansible-playbook site.yml -v
+ansible-playbook site.yml -v -e os=rhel7
 ```
 
 > As etapas para a instalação do ansible estão documentadas na página [Installing Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible), para o nosso ambiente este processo já foi executado durante a configuração do Cloud9;
