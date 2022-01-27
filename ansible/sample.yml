@@ -15,7 +15,6 @@
     - name: Sample | Gather information about RHEL 7 AMIs published by Canonical (309956199498)
       amazon.aws.ec2_ami_info:
         owners: 309956199498
-        region: "{{ aws_region }}"
         filters:
           name: "RHEL-7.?*GA*"
       register: ec2_ami_info
