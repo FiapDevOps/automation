@@ -14,10 +14,14 @@ sh $HOME/environment/automation/cloud9/scripts/resize.sh 20 > /dev/null
 printf "\n Configurando Dependencias \n"
 sudo yum install -y tmux jq
 
-# Instalando o docker + docker-compose
 printf "\n Instalando o docker-compose \n"
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+
+printf "\n Instalando o hashcorp Packer \n"
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum -y install packer
 
 # Download e instalação do kubectl
 printf "\n Instalando o cliente do Kubernetes \n"
