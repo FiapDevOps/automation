@@ -16,11 +16,18 @@ Neste laboratório o terraform fica responsável por gerenciar os seguintes iten
 Para a configuração de rede, utilizaremos o modulo da AWS:
 [https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest);
 
-1.1. Iniciar o ambiente de Desenvolvimento Remoto:
+1.0. Iniciar o ambiente de Desenvolvimento Remoto:
 
 Aceese a console AWS e em seguida selecione o serviço Cloud9, no ambiente **SEGLAB** clique em **OPEN IDE**:
 
 ![CLOUD9_04](../cloud9/images/CLOUD9_04.PNG)
+
+1.1. Configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
+
+```sh
+export AWS_ACCESS_KEY_ID=XXXXXXXXXXX
+export AWS_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+```
 
 1.2. Utilizando a ferramenta AWS CLI verifique a configuração de rede, subnet e security groups atuais:
 
