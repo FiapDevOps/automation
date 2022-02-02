@@ -13,9 +13,17 @@ Para o funcionamento das tarefas desta prova de conceito é importante que o amb
 
 O arquivo sample.yml possui um exemplo de um playbook usando ansible para provisionar uma instância na AWS utilizando informações extraídas da VPC, para execução deste teste no ambiente configurado em aula configure um ambiente de provisionamento usando o Cloud9 de acordo com as [etapas documentadas neste repositório](https://github.com/fiapdevops/automation/tree/main/cloud9) e em seguida siga as seguintes etapas:
 
-No ambiente com Cloud9 o ansible já foi instalado, a partir desta etapa faça uma cópia deste repositório, dentro do diretório automation/ansible execute:
+No ambiente com Cloud9 o ansible já foi instalado, a partir desta etapa configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
 
 ```sh
+export AWS_ACCESS_KEY_ID=XXXXXXXXXXX
+export AWS_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+```
+
+Com a configuração finalizada dentro do diretório automation/ansible (Uma cópia deste repositório) execute:
+
+```sh
+cd ~/environment/automation/ansible
 ansible-playbook site.yml -v
 ```
 
@@ -55,16 +63,16 @@ Verifique a estrutura de execução com atenção sobre alguns pontos:
 
 O modelo descrito nessse exemplo segue uma documentação de boas práticas para a estrutura de automação disponível na URL [https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices);
 
-**Para execução deste playbook duas alterações serão necessárias:**
+**Caso tenha configurado as credenciais de acesso na etapa anterior pule para o item 2.3**
 
-2.2. Verfique e configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
+2.2. Configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
 
 ```sh
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXX
 export AWS_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-export AWS_DEFAULT_REGION=us-west-2
-export ANSIBLE_HOST_KEY_CHECKING=False
 ```
+
+Para execução deste playbook duas alterações serão necessárias:
 
 2.3. Altere o arquivo roles/php/tasks/main.yml removendo a dependência simplepie:
 
@@ -74,9 +82,12 @@ cat roles/php-fpm/tasks/main.yml
 sed -i '/php-simplepie/d' roles/php-fpm/tasks/main.yml
 ```
 
+> Existe um erro entre essa dependência e a versão de PHP que será entregue pela instalação nesta versão de RHEL7
+
 2.4. No acesso remoto via ssh utilizaremos o usuário ec2-user, para isso edite o arquivo site.yml de acordo com o padrão abaixo:
 
 ```sh
+cat <<EOF > site.yml
 - name: Install WordPress, MariaDB, Nginx, and PHP-FPM
   hosts: wordpress-server
   remote_user: ec2-user
@@ -88,9 +99,8 @@ sed -i '/php-simplepie/d' roles/php-fpm/tasks/main.yml
     - nginx
     - php-fpm
     - wordpress
+EOF
 ```
-
-> Existe um erro entre essa dependência e a versão de PHP que será entregue pela instalação nesta versão de RHEL7
 
 2.5. Crie um arquivo de inventário adicionando o host de destino (discutiremos em seguida alternativas com base em inventários dinâmicos):
 
@@ -114,7 +124,7 @@ EOF
 2.6. Após a alteração execute o playbook para gerenciar a configuração na instância criada na etapa anterior:
 
 ```sh
- ansible-playbook site.yml -i hosts -v
+ansible-playbook site.yml -i hosts -v
 ```
 
 2.7. Pontos interessantes:
@@ -178,12 +188,12 @@ roles
 3.2. Nesta configuração determinaremos quais instâncias serão utilziadas com base em um [inventário gerado dinamicamente](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html) ao executar o ansible, o inventário foi construdio com base na tag 'env' utilizada na criação da instância, para isso crie um arquivo de inventário:
 
 ```sh
-cd /home/ec2-user/environment/ansible-examples/wordpress-nginx_rhel7
+cd ~/environment/ansible-examples/wordpress-nginx_rhel7
 
 cat <<EOF > inventory_aws_ec2.yml
 plugin: aws_ec2
 regions:
-  - "us-west-2"
+  - "$AWS_REGION"
 
 hostnames:
   - private-dns-name
@@ -224,7 +234,7 @@ ansible-playbook site.yml -i inventory_aws_ec2.yml -v
 
 ---
 
-Com esta configuração o ansible fara a iteração sobre as duas instâncias inventariadas de acordo com a tag env:staging;
+Com esta configuração o ansible fara a iteração sobre as duas instâncias inventariadas de acordo com a tag env:staging, para validar o comportamento volte na etapa anterior e execute o playbook ansible para criar uma nova instância;
 
 ---
 

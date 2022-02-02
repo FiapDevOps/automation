@@ -10,14 +10,11 @@
 - hosts: localhost
   connection: local
   gather_facts: False
-  vars:
-    aws_region: us-west-2
 
   tasks:
     - name: Sample | Gather information about RHEL 7 AMIs published by Canonical (309956199498)
       amazon.aws.ec2_ami_info:
         owners: 309956199498
-        region: "{{ aws_region }}"
         filters:
           name: "RHEL-7.?*GA*"
       register: ec2_ami_info
@@ -37,12 +34,10 @@
 
     - name: Sample | Gather information about VPC
       amazon.aws.ec2_vpc_net_info:
-        region: "{{ aws_region }}"
       register: ec2_vpc_net_info
       
     - name: Sample | Gather information about Subnet
       amazon.aws.ec2_vpc_subnet_info:
-        region: "{{ aws_region }}"
         filters:
           vpc-id: "{{ ec2_vpc_net_info.vpcs[0].vpc_id }}"
       register: ec2_vpc_subnet_info
@@ -52,7 +47,6 @@
       amazon.aws.ec2:
         key_name: id_lab
         group: default
-        region: "{{ aws_region }}"
         instance_type: t2.micro
         image: "{{ ec2_ami_latest.image_id }}"
         wait: yes

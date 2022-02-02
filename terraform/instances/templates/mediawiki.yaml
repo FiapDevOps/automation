@@ -5,18 +5,6 @@ packages:
   - curl
   - gnupg-agent
   - software-properties-common
-
-users:
-  - default
-  - name: aluno
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    groups: sudo, docker
-    shell: /bin/bash
-ssh_pwauth: true
-chpasswd:
-  list: |
-    aluno:aluno
-  expire: true
   
 write_files:
 -   content: |
