@@ -63,14 +63,16 @@ Verifique a estrutura de execução com atenção sobre alguns pontos:
 
 O modelo descrito nessse exemplo segue uma documentação de boas práticas para a estrutura de automação disponível na URL [https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices);
 
-**Para execução deste playbook duas alterações serão necessárias:**
+**Caso tenha configurado as credenciais de acesso na etapa anterior pule para o item 2.3**
 
-2.2. Verfique e configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
+2.2. Configure as seguintes variáveis de ambiente com as credênciais de acesso, elas estão disponíveis nos outputs do Cloud9:
 
 ```sh
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXX
 export AWS_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
+
+Para execução deste playbook duas alterações serão necessárias:
 
 2.3. Altere o arquivo roles/php/tasks/main.yml removendo a dependência simplepie:
 
@@ -80,9 +82,12 @@ cat roles/php-fpm/tasks/main.yml
 sed -i '/php-simplepie/d' roles/php-fpm/tasks/main.yml
 ```
 
+> Existe um erro entre essa dependência e a versão de PHP que será entregue pela instalação nesta versão de RHEL7
+
 2.4. No acesso remoto via ssh utilizaremos o usuário ec2-user, para isso edite o arquivo site.yml de acordo com o padrão abaixo:
 
 ```sh
+cat <<EOF > site.yml
 - name: Install WordPress, MariaDB, Nginx, and PHP-FPM
   hosts: wordpress-server
   remote_user: ec2-user
@@ -94,9 +99,8 @@ sed -i '/php-simplepie/d' roles/php-fpm/tasks/main.yml
     - nginx
     - php-fpm
     - wordpress
+EOF
 ```
-
-> Existe um erro entre essa dependência e a versão de PHP que será entregue pela instalação nesta versão de RHEL7
 
 2.5. Crie um arquivo de inventário adicionando o host de destino (discutiremos em seguida alternativas com base em inventários dinâmicos):
 

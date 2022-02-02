@@ -9,22 +9,26 @@ terraform {
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
 data "aws_vpc" "my_vpc" {
   tags = {
-    Terraform = "true"
-    Environment = "lab"
+    terraform = "true"
+    environment = "lab"
   }
 }
 
-data "aws_security_group" "selected" {
-  vpc_id      = data.aws_vpc.my_vpc.id
+data "aws_security_groups" "selected" {
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.my_vpc.id]
+  }
+  
   tags = {
-    Terraform = "true"
-    Environment = "lab"
-    Tier = "FE"
+    terraform = "true"
+    environment = "lab"
   }
 }
 
@@ -37,8 +41,8 @@ data "aws_subnet_ids" "selected" {
   }
 
   tags = {
-    Terraform = "true"
-    Environment = "lab"
+    terraform = "true"
+    environment = "lab"
   }
 }
 
@@ -61,16 +65,17 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "web_app" {
   for_each                      = data.aws_subnet_ids.selected.ids
     ami                         = data.aws_ami.ubuntu.id
-    instance_type               = "t2.medium"
+    instance_type               = "t3a.medium"
     associate_public_ip_address = true    
     user_data                   = "${file("templates/mediawiki.yaml")}"
-    vpc_security_group_ids      = [data.aws_security_group.selected.id]
+    vpc_security_group_ids      = tolist(data.aws_security_groups.selected.ids)
+    key_name                    = id_lab
+
     subnet_id                   = each.value
   
     tags = {
-        Name        = "mediawiki"
-        Terraform   = "true"
-        Environment = "lab"
-        Tier        = "public"
+        terraform   = "true"
+        environment = "lab"
+        tier        = "public"
     }
 }

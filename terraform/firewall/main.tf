@@ -4,7 +4,7 @@
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-east-2"
+  region = "us-west-2"
 }
 
 locals {
@@ -25,8 +25,8 @@ terraform {
 
 data "aws_vpc" "my_vpc" {
   tags = {
-    Terraform = "true"
-    Environment = "lab"
+    terraform = "true"
+    environment = "lab"
   }
 }
 
@@ -45,7 +45,7 @@ data "aws_security_group" "def_sg" {
 
 # Exemplo 1: Construindo um security group para liberar ingresso na porta 80 de qualquer origem:
 
-resource "aws_security_group" "allow_web_server_access" {
+resource "aws_security_group" "web_server_sg" {
 
   name        = "allow_web_server_access"
   description = "Security group with HTTP ports open for everybody (IPv4 CIDR), egress ports are all world open"
@@ -69,12 +69,10 @@ resource "aws_security_group" "allow_web_server_access" {
   }
 
   tags = {
-    Terraform = "true"
-    Environment = "lab"
-    Tier = "FE"
+    terraform = "true"
+    environment = "lab"
+    tier = "FE"
   }
-
-  ingress_cidr_blocks = ["0.0.0.0/0"]
 }
 
 # Exemplo 2: Configurando acesso remoto via SSH entre dois groupos:
@@ -90,7 +88,7 @@ resource "aws_security_group" "default_vpc_sg" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    security_groups = [data.aws_security_group.default_vpc_sg.id]
+    security_groups = [data.aws_security_group.def_sg.id]
   }
 
   egress {
@@ -102,9 +100,9 @@ resource "aws_security_group" "default_vpc_sg" {
   }
 
   tags = {
-    Terraform = "true"
-    Environment = "lab"
-    Tier = "BE"
+    terraform = "true"
+    environment = "lab"
+    tier = "BE"
   }
 }
 
@@ -124,7 +122,7 @@ module "mysql_sg" {
   computed_ingress_with_source_security_group_id = [
     {
       rule                     = "mysql-tcp"
-      source_security_group_id = module.web_server_sg.security_group_id
+      source_security_group_id = aws_security_group.web_server_sg.id
     },
   ]
 
