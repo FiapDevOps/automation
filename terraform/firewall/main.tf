@@ -101,6 +101,7 @@ module "mysql_sg" {
 
 
 # Exemplo 3: Configurando acesso remoto via SSH entre dois groupos:
+# Para liberar execute: sed -i '105,142s/^#//' main.tf
 
 #resource "aws_security_group" "allow_access_from_cloud9_sg" {
 
