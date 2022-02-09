@@ -49,6 +49,7 @@ module "vpc" {
 # ---- Criar uma rota entre a VPC Default e o range 10.0.0.0/16 (Usado no Peering)
 # ---- Criar uma rota entre a VPC de Peering e o range 172.31.0.0/16 da VPC Default
 
+# Para liberar execute: sed -i '54,91s/^#//' main.tf
 
 #data "aws_vpc" "default" {
 #  default = true
