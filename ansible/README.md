@@ -207,11 +207,11 @@ roles
 ...
 ```
 
+---
+
 3. Configurar e utilizar um inventário dinâmico é uma ótima prática para usuários de ansible já que não há um controlador para garantir o estado ou um cliente para executar um processo de discovery para novas instâncias, essa configuração é feita de acordo com o Cloud Provider a partir da tags ou outras informações extraídas da infraestrutura;
 
-3.1. Antes de iniciar a configuração execute novamente o playbook sample para criar uma segunda instância na AWS;
-
-3.2. Nesta configuração determinaremos quais instâncias serão utilziadas com base em um [inventário gerado dinamicamente](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html) ao executar o ansible, o inventário foi construdio com base na tag 'env' utilizada na criação da instância, para isso crie um arquivo de inventário:
+3.1. Nesta configuração determinaremos quais instâncias serão utilziadas com base em um [inventário gerado dinamicamente](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html) ao executar o ansible, o inventário foi construdio com base na tag 'env' utilizada na criação da instância, para isso crie um arquivo de inventário:
 
 ```sh
 cd ~/environment/ansible-examples/wordpress-nginx_rhel7
