@@ -103,7 +103,7 @@ terraform apply
 
 ---
 
-# Item 3: Configuração Instancias
+# Item 3: Configuração de Aplicações
 
 Na terceira e última etapa utilizaremos a arquitetura anterior para a entrega de uma aplicação de exemplo;
 
