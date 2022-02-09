@@ -13,7 +13,7 @@ terraform {
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 module "vpc" {
@@ -22,7 +22,7 @@ module "vpc" {
   name = "main"
   cidr = "10.0.0.0/16"
 
-  azs             = ["us-west-2a", "us-west-2b"]
+  azs             = ["us-east-1a", "us-east-1b"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
 
@@ -35,53 +35,56 @@ module "vpc" {
   }
 }
 
-####################################################################################
-# Peering
+### ---- Peering ----
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_table
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_tables
 # https://github.com/hashicorp/terraform-provider-aws/issues/373
 
-# Recuperando dados da VPC Default
-data "aws_vpc" "default" {
-  default = true
-}
-
-# Recuperando dados da Default Routing Table
-data "aws_route_table" "selected" {
-  vpc_id  = data.aws_vpc.default.id
-}
-
-# Recuperando dados das Tabelas de roteamento geradas com a nova VPC e suas respectivas subnets
-data "aws_route_tables" "rts" {
-  tags = {
-    terraform = "true"
-    environment = "lab"
-  }
-}
+# ---- Remova os comentarios do bloco abaixo para executar respectivamente as tarefas:
+# ---- Data source para recuperar dados da VPC Default;
+# ---- Data source para recuperar dados da Default Routing Table;
+# ---- Data source para recuperar dados das Tabelas de roteamento;
+# ---- Criar o peering entre as VPCS;
+# ---- Criar uma rota entre a VPC Default e o range 10.0.0.0/16 (Usado no Peering)
+# ---- Criar uma rota entre a VPC de Peering e o range 172.31.0.0/16 da VPC Default
 
 
-# Criando o peering entre as VPCS:
-resource "aws_vpc_peering_connection" "main" {
-  peer_vpc_id   = module.vpc.vpc_id
-  vpc_id        = data.aws_vpc.default.id
-  auto_accept   = true
+#data "aws_vpc" "default" {
+#  default = true
+#}
 
-  tags = {
-    Name = "VPC Peering between main and default vpcs"
-  }
-}
+#data "aws_route_table" "selected" {
+#  vpc_id  = data.aws_vpc.default.id
+#}
 
-resource "aws_route" "route_to_main_vpc" {
-  route_table_id            = data.aws_route_table.selected.id
-  destination_cidr_block    = "10.0.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.main.id
-}
+#data "aws_route_tables" "rts" {
+#  tags = {
+#    terraform = "true"
+#    environment = "lab"
+#  }
+#}
 
-resource "aws_route" "route_to_default_vpc" {
+#resource "aws_vpc_peering_connection" "main" {
+#  peer_vpc_id   = module.vpc.vpc_id
+#  vpc_id        = data.aws_vpc.default.id
+#  auto_accept   = true
 
-  count                     = length(data.aws_route_tables.rts.ids)
-  route_table_id            = tolist(data.aws_route_tables.rts.ids)[count.index]
-  destination_cidr_block    = "172.31.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.main.id
-}
+#  tags = {
+#    Name = "VPC Peering between main and default vpcs"
+#  }
+#}
+
+#resource "aws_route" "route_to_main_vpc" {
+#  route_table_id            = data.aws_route_table.selected.id
+#  destination_cidr_block    = "10.0.0.0/16"
+#  vpc_peering_connection_id = aws_vpc_peering_connection.main.id
+#}
+
+#resource "aws_route" "route_to_default_vpc" {
+
+#  count                     = length(data.aws_route_tables.rts.ids)
+#  route_table_id            = tolist(data.aws_route_tables.rts.ids)[count.index]
+#  destination_cidr_block    = "172.31.0.0/16"
+#  vpc_peering_connection_id = aws_vpc_peering_connection.main.id
+#}

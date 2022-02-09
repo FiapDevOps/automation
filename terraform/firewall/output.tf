@@ -1,4 +1,4 @@
 output "security_group_id" {
   description = "The ID of the security group"
-  value       = module.web_server_sg.security_group_id
+  value       = aws_security_group.web_server_sg.id
 }

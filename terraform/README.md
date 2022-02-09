@@ -1,5 +1,7 @@
 # Objetivo
 
+![TERRAFORM_01](images/TERRAFORM_01.png)
+
 Utilizar a estrutura declarativa do terraform para orquestrar a criação de um servidor web linux rodando Nginx ou Apache encapsulados em container Docker;
 
 # Caracteriísticas:
@@ -83,6 +85,41 @@ Aceese a console AWS e em seguida selecione o serviço Cloud9, no ambiente **SEG
 ```sh
 cd $HOME/environment/automation/terraform/firewall
 terraform init
+```
+
+2.3. Esta etapa da automação será usada para configurar regras de grupos de segurança fornecendo os seguintes acessos:
+
+| Nome                          | Perfil                                                  |
+|-------------------------------|---------------------------------------------------------|
+| allow_web_server_access       | Acesso liberado para a porta 80                         |
+| allow_access_from_cloud9_sg   | Acesso do grupo do Cloud9 para o VPC main               |
+| allow_access_to_mysql_backend | Accesso das VPC publicas para as privadas na porta 3306 |
+
+2.4. Usando o terraform aplique o modelo configurando as regras e grupos:
+
+```sh
+terraform apply
+```
+
+---
+
+# Item 3: Configuração Instancias
+
+Na terceira e última etapa utilizaremos a arquitetura anterior para a entrega de uma aplicação de exemplo;
+
+3.1. Inicialize o terraform no diretório contendo a automação das instancias:
+
+```sh
+cd $HOME/environment/automation/terraform/instances
+terraform init
+```
+
+3.2. Verifique o planejamento das alterações, em resumo a automação deverá recuperar alguns dados sobre a VPC e Subnets para em seguida entrega duas instancias EC2 com um bloco de configuração [usando cloud-init](https://cloudinit.readthedocs.io/en/latest/) para instalar pacotes e subir a aplicação;
+
+3.3. Finalmente execute a ultima etapa configurando a aplicação:
+
+```sh
+terraform apply
 ```
 
 ---

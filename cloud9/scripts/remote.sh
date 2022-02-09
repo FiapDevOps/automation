@@ -21,7 +21,7 @@ printf "Identificando o SecurityGroup do projeto"
 aws ec2 describe-security-groups --filters Name=group-name,Values=*aws-cloud9* --query "SecurityGroups[*].[GroupName]" --output table
 
 # Definindo os SGs
-SG_NAME=$(aws ec2 describe-security-groups --filters Name=group-name,Values=*aws-cloud9* --query "SecurityGroups[*].[GroupName]" --output text)
+CURRENT_SG=$(aws ec2 describe-security-groups --filters Name=group-name,Values=*aws-cloud9* --query "SecurityGroups[*].[GroupName]" --output text)
 DEFAULT_SG=$(aws ec2 describe-security-groups --filters Name=group-name,Values=default --query "SecurityGroups[*].[GroupName]" --output text)
 
 
@@ -30,14 +30,14 @@ printf "Qual o end. de rede publico de sua origem para acesso remoto? Coloque ap
 read REMOTE_PUBLIC_IP
 
 # Regras para SSH
-aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol tcp --port 0-65535 --cidr $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $CURRENT_SG --protocol tcp --port 0-65535 --cidr $REMOTE_PUBLIC_IP/32
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp --port 0-65535 --cidr $REMOTE_PUBLIC_IP/32
-aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp --port 0-65535 --source-group $SG_NAME
+aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol tcp --port 0-65535 --source-group $CURRENT_SG
 
 # Regras para ICMP
-aws ec2 authorize-security-group-ingress --group-name $SG_NAME --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
+aws ec2 authorize-security-group-ingress --group-name $CURRENT_SG --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
 aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --cidr $REMOTE_PUBLIC_IP/32
-aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --source-group $SG_NAME
+aws ec2 authorize-security-group-ingress --group-name $DEFAULT_SG --protocol icmp --port -1 --source-group $CURRENT_SG
 
 
 cat $HOME/environment/info/id_lab.pem

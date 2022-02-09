@@ -4,7 +4,7 @@
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 locals {
@@ -23,7 +23,7 @@ terraform {
 }
 
 
-data "aws_vpc" "my_vpc" {
+data "aws_vpc" "main" {
   tags = {
     terraform = "true"
     environment = "lab"
@@ -34,12 +34,12 @@ data "aws_vpc" "def_vpc" {
   default = true
 }
 
-data "aws_security_group" "def_sg" {
+data "aws_security_group" "cloud9_sg" {
   vpc_id = data.aws_vpc.def_vpc.id
 
   filter {
     name   = "group-name"
-    values = ["default"]
+    values = ["*cloud9*"]
   }
 }
 
@@ -49,7 +49,7 @@ resource "aws_security_group" "web_server_sg" {
 
   name        = "allow_web_server_access"
   description = "Security group with HTTP ports open for everybody (IPv4 CIDR), egress ports are all world open"
-  vpc_id      = data.aws_vpc.my_vpc.id
+  vpc_id      = data.aws_vpc.main.id
 
   ingress {
     description      = "Allow HTTP"
@@ -69,44 +69,14 @@ resource "aws_security_group" "web_server_sg" {
   }
 
   tags = {
+    Name = "allow_web_server_access"
     terraform = "true"
     environment = "lab"
-    tier = "FE"
+    tier = "public"
   }
 }
 
-# Exemplo 2: Configurando acesso remoto via SSH entre dois groupos:
-
-resource "aws_security_group" "default_vpc_sg" {
-
-  name        = "allow_access_from_default_vpc"
-  description = "Allow Default Security Group to access new Security Group Instances"
-  vpc_id      = data.aws_vpc.my_vpc.id
-  
-  ingress {
-    description      = "Allow SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    security_groups = [data.aws_security_group.def_sg.id]
-  }
-
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  tags = {
-    terraform = "true"
-    environment = "lab"
-    tier = "BE"
-  }
-}
-
-# Exemplo 3: Construindo um security group usando um modulo externo e dois tipos de regras:
+# Exemplo 2: Construindo um security group usando um modulo externo e dois tipos de regras:
 # 1 Regra de acesso na mesma porta baseada em dois ranges fictios de backends;
 # 2 Regra baseada no acesso a porta 3306 com origem no grupo criado anteriomente;
   
@@ -115,7 +85,7 @@ module "mysql_sg" {
 
   name        = "allow_access_to_mysql_backend"
   description = "Security group with MySQL/Aurora port open for HTTP security group created above (computed)"
-  vpc_id      = data.aws_vpc.my_vpc.id
+  vpc_id      = data.aws_vpc.main.id
 
   ingress_cidr_blocks = local.private_subnets
 
@@ -128,3 +98,44 @@ module "mysql_sg" {
 
   number_of_computed_ingress_with_source_security_group_id = 1
 }
+
+
+# Exemplo 3: Configurando acesso remoto via SSH entre dois groupos:
+
+#resource "aws_security_group" "allow_access_from_cloud9_sg" {
+
+#  name        = "allow_access_from_cloud9_sg"
+#  description = "Allow Cloud9 Security Group to access new Security Group Instances"
+#  vpc_id      = data.aws_vpc.main.id
+  
+#  ingress {
+#    description      = "Allow SSH"
+#    from_port        = 22
+#    to_port          = 22
+#    protocol         = "tcp"
+#    security_groups = [data.aws_security_group.cloud9_sg.id]
+#  }
+
+#  ingress {
+#    description      = "Allow ICMP"
+#    from_port = -1
+#    to_port = -1
+#    protocol = "icmp"
+#    security_groups = [data.aws_security_group.cloud9_sg.id]
+#  }
+
+#  egress {
+#    from_port        = 0
+#    to_port          = 0
+#    protocol         = "-1"
+#    cidr_blocks      = ["0.0.0.0/0"]
+#    ipv6_cidr_blocks = ["::/0"]
+#  }
+#
+#  tags = { 
+#    Name = "allow_access_from_cloud9_sg"
+#    terraform = "true"
+#    environment = "lab"
+#    tier = "private"
+#  }
+#}

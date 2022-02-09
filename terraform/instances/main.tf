@@ -9,10 +9,10 @@ terraform {
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
-data "aws_vpc" "my_vpc" {
+data "aws_vpc" "main" {
   tags = {
     terraform = "true"
     environment = "lab"
@@ -23,7 +23,7 @@ data "aws_security_groups" "selected" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.my_vpc.id]
+    values = [data.aws_vpc.main.id]
   }
   
   tags = {
@@ -33,7 +33,7 @@ data "aws_security_groups" "selected" {
 }
 
 data "aws_subnet_ids" "selected" {
-  vpc_id = data.aws_vpc.my_vpc.id
+  vpc_id = data.aws_vpc.main.id
 
   filter {
     name   = "tag:Name"
@@ -67,9 +67,10 @@ resource "aws_instance" "web_app" {
     ami                         = data.aws_ami.ubuntu.id
     instance_type               = "t3a.medium"
     associate_public_ip_address = true    
-    user_data                   = "${file("templates/mediawiki.yaml")}"
+    user_data                   = "${file("templates/nginx.yaml")}"
+#   user_data                   = "${file("templates/mediawiki.yaml")}"
     vpc_security_group_ids      = tolist(data.aws_security_groups.selected.ids)
-    key_name                    = id_lab
+    key_name                    = "id_lab"
 
     subnet_id                   = each.value
   

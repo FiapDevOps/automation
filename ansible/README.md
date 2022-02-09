@@ -4,7 +4,7 @@
 
 O Ansible é uma ferramenta de automação que ganhou popularidade na última década devido a sua flexibilidade, facilidade de manipulação e modelo "masterless" sem a necessidade de um controlador primário de execução, além de uma estrutura bem documentada e apoiada por comunidades e projetos de Tecnologia;
 
-Os principais objetivos do Ansible são simplicidade e facilidade de uso apresentando um mínimo de peças móveis, a partir de uma implantação simples,  utilizando o OpenSSH como principal mecanismo de acesso aturoização e autenticação é possível configurar sistemas, instalar pacotes e orquestrar tarefas complexas;
+Os principais objetivos do Ansible são simplicidade e facilidade de uso apresentando um mínimo de peças móveis, a partir de uma implantação simples,  utilizando o OpenSSH como principal mecanismo de acesso autorização e autenticação é possível configurar sistemas, instalar pacotes e orquestrar tarefas complexas;
 
 Para o funcionamento das tarefas desta prova de conceito é importante que o ambiente com o Cloud9 tenha sido [devidamente configurado](https://github.com/FiapDevOps/automation/tree/main/cloud9) com a criação da chave de acesso usando o script remote;
 
@@ -72,17 +72,29 @@ export AWS_ACCESS_KEY_ID=XXXXXXXXXXX
 export AWS_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
 
-Para execução deste playbook duas alterações serão necessárias:
+2.3. Para execução deste playbook algumas alterações serão necessárias:
 
-2.3. Altere o arquivo roles/php/tasks/main.yml removendo a dependência simplepie:
+2.3.1. Altere o arquivo roles/php/tasks/main.yml removendo a dependência simplepie:
 
 ```sh
 cat roles/php-fpm/tasks/main.yml
-#
 sed -i '/php-simplepie/d' roles/php-fpm/tasks/main.yml
 ```
 
 > Existe um erro entre essa dependência e a versão de PHP que será entregue pela instalação nesta versão de RHEL7
+
+2.3.2. Adicione uma linha de execução na role common:
+
+```sh
+cat <<EOF >> ~/environment/ansible-examples/wordpress-nginx_rhel7/roles/common/tasks/main.yml
+#
+- name: Disable SELinux
+  selinux: state=disabled
+EOF
+```
+
+> Essa alteração ocorre devido a um erro na liberação do mariadb no firewall de contexto SELINUX do Rhel 7
+
 
 2.4. No acesso remoto via ssh utilizaremos o usuário ec2-user, para isso edite o arquivo site.yml de acordo com o padrão abaixo:
 
@@ -102,7 +114,13 @@ cat <<EOF > site.yml
 EOF
 ```
 
-2.5. Crie um arquivo de inventário adicionando o host de destino (discutiremos em seguida alternativas com base em inventários dinâmicos):
+2.4.1. As diferenças podem ser avaliadas usando o proprio git:
+
+```sh
+git diff
+```
+
+2.5.1. Crie um arquivo de inventário adicionando o host de destino (discutiremos em seguida alternativas com base em inventários dinâmicos):
 
 Será necessário extrair o endereço da instância provisionada, faça isso usado o CLI da AWS:
 
@@ -111,7 +129,7 @@ export TARGET=$(aws ec2 describe-instances   --filters "Name=tag:env,Values=stag
 echo $TARGET
 ```
 
-Com o endereço IP crie o nosso arquivo de inventário estático:
+2.5.2. Com o endereço IP crie o nosso arquivo de inventário estático:
 
 ```sh
 cat <<EOF > hosts
@@ -121,11 +139,19 @@ $TARGET
 EOF
 ```
 
+2.5.3. Por enquanto este será o nosso *Inventário estático** para que o ansible identifique onde rodar o proximo palybook:
+
+```sh
+cat hosts
+```
+
 2.6. Após a alteração execute o playbook para gerenciar a configuração na instância criada na etapa anterior:
 
 ```sh
 ansible-playbook site.yml -i hosts -v
 ```
+
+*Caso ocorra um erro durante a reinicialização do banco de dados basta rodar novamente o mesmo playbook repetindo o comando anterior*
 
 2.7. Pontos interessantes:
 
@@ -212,12 +238,6 @@ Para validar o inventário execute:
 
 ```sh
 ansible-inventory -i inventory_aws_ec2.yml --graph
-
-@all:
-  |--@_staging:
-  |  |--ip-172-31-45-19.us-west-2.compute.internal
-  |  |--ip-172-31-45-245.us-west-2.compute.internal
-...
 ```
 
 Altere o arquivo site.yml para que o playbook faça referência ao grupo staging para determinar os hosts que serão configurados;
@@ -232,9 +252,7 @@ Em seguida execute novamente o playbook usando o inventário dinâmico:
 ansible-playbook site.yml -i inventory_aws_ec2.yml -v
 ```
 
----
-
-Com esta configuração o ansible fara a iteração sobre as duas instâncias inventariadas de acordo com a tag env:staging, para validar o comportamento volte na etapa anterior e execute o playbook ansible para criar uma nova instância;
+Com esta configuração o ansible deve iterar sobre as duas instâncias inventariadas de acordo com a tag env:staging, para validar o comportamento volte na etapa anterior e execute o playbook ansible para criar uma segunda instância;
 
 ---
 
