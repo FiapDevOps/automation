@@ -1,0 +1,10 @@
+groups:
+  - name: default
+    rules:
+      - alert: AppDown
+        expr:  up{job="app"} != 1
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: Our app is not responding, please check it
