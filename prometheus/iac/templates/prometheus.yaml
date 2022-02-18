@@ -15,4 +15,4 @@ runcmd:
   - chmod +x /usr/local/bin/docker-compose
   - git clone https://github.com/fiapdevops/automation /home/ubuntu/automation
   - chown -R ubuntu:ubuntu /home/ubuntu/automation
-  - /usr/local/bin/docker-compose up -d -f /home/ubuntu/automation/prometheus/docker-compose.yml
+  - sudo /usr/local/bin/docker-compose -f /home/ubuntu/automation/prometheus/docker-compose.yml up -d
