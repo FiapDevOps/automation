@@ -2,7 +2,7 @@ version: '3.8'
   
 services:
 
-  prometheus:
+  app:
     image: devfiap/python-flask-app:0.1
     environment:
       - PORT=8080
@@ -10,7 +10,8 @@ services:
       - 8080:8080
     networks:
        monitoring:
-
+       
+  prometheus:
     image: prom/prometheus:v2.33.3
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -22,6 +23,8 @@ services:
 
   node-exporter:
     image: prom/node-exporter:v1.3.1
+    ports:
+      - 9100:9100
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
