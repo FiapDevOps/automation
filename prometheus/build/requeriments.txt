@@ -1,0 +1,3 @@
+Flask==1.1.2
+prometheus-client==0.9.0
+prometheus-flask-exporter==0.18.1

@@ -7,102 +7,129 @@ Deploy a python app usando prometheus como ferramenta de monitoração
 
 ## Setup do Prometheus
 
-Neste laboratório a [infraestrutura de rede utilizada para entrega de uma aplicação via terraform](https://github.com/fiapdevops/automation/terraform) do exemplo deste repositório será reutilizada;
-
 O prometheus é uma plataforma de monitoração modular baseada em uma linguagem de consulta chamada [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/), em nosso cenário entregaremos uma instancia do prometheus em docker como microserviço para monitorar uma aplicação simples;
 
-1.1. Acesse o diretório infra dentro dessa pasta e inicie o terraform:
+1.1. Neste cenário usaremos um bucket remoto para armazenar e posteriormente recuperar o estado da automação, para isso execute:
 
 ```sh
-cd $HOME/environment/automation/prometheus/infra
-terraform init
+aws s3api create-bucket --bucket terraform-$C9_PID --region us-east-1 
 ```
 
-1.2. Verifique a partir do plan que o modelo fara a entrega de uma instancia ubuntu com base no template alocado no diretório "infra/cloud-init" bem como as regras de liberação dos grupos de segurança para comunicacão entre o prometheus e as aplicações
+1.2. Com base no resultado do comando anterior utilize o nome do bucket para configurar o backend do terraform na automação:
 
 ```sh
-cd $HOME/environment/automation/prometheus/infra
+cd $HOME/environment/automation/prometheus/iac
+
+# Substitua a linha abaixo pelo bucket identificado no STDOUT do comando anterior
+sed -i s/mybucket/terraform-xxxxxxxxxxxxxxxxxxxxxxx/g main.tf
+```
+
+1.3. Inicie o terraform:
+
+```sh
+terraform init
+terraform plan
+```
+
+1.2. Verifique a partir do plan que o modelo fara a entrega de uma instancia ubuntu com base no template de [cloud-init](https://cloudinit.readthedocs.io/en/latest/) alocado no diretório "iac/templates" bem como as regras de liberação dos grupos de segurança para comunicacão entre o prometheus e as aplicações
+
+```sh
 terraform apply
+```
+
+> Será configurada uma nova instancia via terraform com o prometheus em listen na porta 80 e a aplicação em listen na porta 8080 de acordo com o padrão abaixo:
+
+| descrição                       | path                             |
+|---------------------------------|----------------------------------|
+| Interface do prometheus         | \<IP-APP>:80                     |
+| Acesso na App de testes         | \<IP-APP>:8080                   |
+| Scrape de métricas              | \<IP-APP>:8080/metrics           |
+
+---
+
+## Como configurar um exporter dentro da aplicação
+
+Para testar o modelo de timeseries e sua flexibilidade considere os seguintes pontos:
+
+2.1 A versão original da aplicação é um projeto python usando flask preparado para construção em container, um modelo de construção similar pode ser obtido para estudo no portal Real Python: [https://realpython.com/flask-by-example-part-1-project-setup/](https://realpython.com/flask-by-example-part-1-project-setup/);
+
+2.2. Nesta versão da aplicação foi adicionada uma biblioteca para construção das métricas no prometheus, o [prometheus-flask-exporter](https://pypi.org/project/prometheus-flask-exporter/), acessível a partir do endpoit /metrics ele será um dos responsáveis por gerar pontos de timeseries;
+
+2.3 Uma cópia deste padrão pode ser consultada no diretório build da pasta prometheus:
+
+```sh
+ls $HOME/environment/automation/prometheus/iac/build
+cat $HOME/environment/automation/prometheus/iac/build/src/app.py
+```
+
+2.4 Para gerar a app será utilizado uma imagem criada com base neste build disponível no Dockerhub [https://hub.docker.com/r/devfiap/python-flask-app](https://hub.docker.com/r/devfiap/python-flask-app);
+
+---
+
+# Criando uma regra de alerta
+
+No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
+
+3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
+
+3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
+
+```sh
+cd /home/ubuntu/automation/prometheus
+cat rules.yml
+```
+
+3.3 Adicione uma nova regra de alerta neste arquivo:
+
+```sh
+
+cat <<EOF >> rules.yml
+
+      - alert: NodeExporterDown
+        expr: up{job="node"} != 1
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: The Node exporter metrics is down at $labels.instance
+EOF
+```
+
+3.4 Como a alteração foi executada após o build utilize o docker-compose para reconfigurar a nossa stack:
+
+```sh
+docker-compose restart
+```
+
+3.5 Com este processo temos uma regra especifica para validar a disponibilidade do job "node"responsável pelo node-exporter, simule uma falha no componente e acompanha o alerta pela interface do prometheus:
+
+```sh
+docker kill prometheus_node-exporter_1
 ```
 
 ---
 
-## Configurando um exporter dentro da aplicação
-
-Para testar a aplicação verifique o conteúdo do diretório build em relação aos seguintes pontos:
-
-1.1 A versão original da aplicação é um projeto python usando flask preparado para construção em container, um modelo de construção similar pode ser obtido para estudo no portal Real Python: [https://realpython.com/flask-by-example-part-1-project-setup/](https://realpython.com/flask-by-example-part-1-project-setup/);
+## Configurando um cenário com service discovery:
 
 
-1.2. Nesta versão da aplicação foi adicionada uma biblioteca para construção das métricas no prometheus, o [prometheus-flask-exporter](https://pypi.org/project/prometheus-flask-exporter/), acessível a partir do endpoit /metrics ele será um dos responsáveis por gerar pontos de timeseries;
-
-1.3 Além disso também adicionamos um Dockerfile, pois o modelo descrito nesse exemplo utiliza DockerCompose para entregar todos os serviços necessários usando uma camada de abstração de rede e evitando conflitos de endereço IP:
 
 ```sh
-FROM python:3.8-alpine
-
-# Padronizacao do Workdir
-WORKDIR /src
-
-# Instalacao de Dep.
-COPY requeriments.txt .
-RUN pip install -r requeriments.txt
-COPY src/ .
-
-# Execução da app
-CMD [ "python", "./app.py" ]
+  - job_name: 'node_ec2_job'
+    ec2_sd_configs:
+      - region: us-east-1
+        access_key: ACCESS_KEY
+        secret_key: SECRET_KEY
+        port: 9100
+    relabel_configs:
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance
 ```
-
-1.4 Para gerar o artefato que será utilizado no laboratório acesse o diretório do projeto e execute o build do container:
-
-```sh
-cd $HOME/environment/automation/prometheus/app/
-docker build . -t app:0.1
-docker run --rm --name app -d -e PORT=8080 -p 80:8080 app:0.1
-```
-
-1.3 Após o processo de build você verá um exemplo da aplicação rodando no endereço 127.0.0.1:8080:
-
-| descrição                       | path                              |
-|---------------------------------|-----------------------------------|
-| Entrega da aplicação            | \<IP-APP>:80                     |
-| Scrape de métricas              | \<IP-APP>:80/metrics             |
-
-```sh
-curl 127.0.0.1
-curl 127.0.0.1/metrics
-```
-
-1.4 A aplicação anterior utilizada no teste será iniciada novamente na arquitetura de rede onde está configurado o prometheus e os outros componentes do laboratório, para isso para a aplicação anterior:
-
-```sh
-docker kill app
-docker ps
-```
-
-1.5. Inicie o conjunto de containers que fazem a composição do laboratório com Docker compose:
-
-```sh
-cd $HOME/environment/automation/prometheus/
-docker-compose up -d
-```
-
-Se o processo de build ocorrer conforme esperado e as imagens do prometheus e do segundo componente que trataremos no futuro forem baixadas teremos o seguinte cenário:
-
-| descrição                            | path                              |
-|--------------------------------------|-----------------------------------|
-| Entrega da aplicação Python          | <IP-APP>:80                       |
-| Entrega da monitoração time series   | <IP-APP>:9090                     |
-| Entrega da monitoração da instância  | 127.0.0.1:9100                    |
-
-
-Em nosso modelo temos 4 targets configurados para expor métricas via timeseries, cada um deles é identificado por um job e podem ser consultados na instância onde rodamos nosso stack na path ":9090/targets";
 
 ---
 
 # Indicando as métricas para os SLIs:
 
-No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e exportando métricas, dados que serão usados para produzir alguns exemplos de SLI, acesse a URL da sua stack na porta 9090:
+No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e exportando métricas, dados que serão usados para produzir alguns exemplos de SLI, acesse a URL da sua stack na porta 8080:
 
 2.1 Considere uma métrica simples filtrando requisições http com base no status code:
 
@@ -110,39 +137,38 @@ No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e
 flask_http_request_total{status=~"2.."}
 ```
 
-> O componente prober é responsável por porduzir insumos parta a nossa analise exeuctando requisições http bem sucedidas a cada 1s.
-
-2.2 Poderíamos  interpretar que requisições com status code diferente de 200 representam o indicador desejado (o que provavelmente é falso):
-
-```sh
-sum(rate(flask_http_request_total{status=!"2.."}[5m]))
-```
-
 Nesta métrica usamos a função [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) que considera um intervalo de tempo e um contador como parâmetros para calcular uma "taxa por segundo";
 
-2.3 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
+2.2 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
 
 ```sh
 rate(flask_http_request_total{status=~"5.."}[5m])
 ```
 
-> SLO são sempre baseados em um período de tempo, para o teste anterior a função rate foi utilizada para calcular a quantidade de requisições com retorno 5xx em um intervalo de 5 minutos.
+> Para o teste anterior a função rate foi utilizada para calcular a quantidade de requisições com retorno 5xx em um intervalo de 5 minutos, para simular alguns erros faça uma tentativa de acesso usando a URL /fail (http://X.X.X.X:8080/fail)
 
-## Prática: Disponibilidade e Latência
+---
 
-Para este cenário nossa implementação de SLI será baseada no sucesso da resposta status code HTTP. As respostas 5xx contaram no SLO, enquanto todas as outras solicitações são consideradas bem-sucedidas.
+## Disponibilidade e Latência
 
-Neste contexto nosso SLI de disponibilidade seria a proporção de solicitações bem-sucedidas:
+Este exemplo utiliza um formato similar ao anterior porém adicionando um calculo matemático no cenário:
+
+O objetivo é calcular a taxa de sucesso das requisições HTTP, com base no status code diferente de 5xx nos últimos 10 minutos, esse calculo assume que qualquer requisição cujo retorno seja diferente de 5xx é considerada uma requisição bem sucessida:
 
 ```sh
 sum(rate(flask_http_request_total{job="app", status!~"5.."}[10m])) /  
 sum(rate(flask_http_request_total{job="app"}[10m])) * 100
 ```
 
-> Dentro dos últimos 10 minutos estamos analisando qual a taxa de eventos executados com sucesso (códig ode status diferente de 5xx), ou seja: Eventos válidos dívido pelo total de eventos ocorridos;
+> Dentro dos últimos 10 minutos estamos analisando qual a taxa de eventos executados com sucesso (código de status diferente de 5xx), ou seja: Eventos válidos dívido pelo total de eventos ocorridos;
 
+---
 
-Já o nosso SLI de latência seria a proporção de solicitações mais rápidas do que os limites definidos (threashould), para obter este perfil de dados utilizaremos uma métrica do tipo [historigram](https://prometheus.io/docs/practices/histograms/) acumulado em buckets, este tipo de métrica separa os pontos enviados por intervalos, cada intervalo conta o número de solicitações que levaram um tempo menor ou igual (le) a um determinado valor, neste caso 250 milisegundos:
+## Usando Historigrams
+
+Na implementação do prometheus com timeseries temos alguns tipos interessantes de métricas, entre elas está o [historigram](https://prometheus.io/docs/practices/histograms/) que de forma simplificada permite determinar a proporção de eventos válidos com base em um threashould, para que isso ocorra esse formato basicamente organiza os pontos recebidos em timeseries em buckets,separando os pontos por intervalos, cada intervalo conta o número de solicitações que levaram um tempo menor ou igual (le) a um determinado valor, para este exemplo este valor será de 250 milisegundos:
+
+Dessa forma para determinar quantas requisições foram atendidas em menos de 250 milisegundos poderiamos executar a seguinte consulta:
 
 ```sh
 flask_http_request_duration_seconds_bucket{job="app", le="0.25"}
@@ -155,14 +181,16 @@ Esta métrica baseia-se no acúmulo de buckets, ou seja, contadores que acumulam
 
 Sendo assim cada bucket é sempre um bucket menor que "n" ms, o que significa que na imagem acima os buckets à direita contêm todos os buckets à esquerda.
 
-Você decide quais tamanhos de buckets são significativos dependendo de seus SLIs e escolhendo intervalos que correspondam ao limite superior ao seu indicador, como a métrica baseada em historigram é nativa na maioria das bibliotecas fica mais simples determinar os indicadores nesta abordagem:
+Você decide quais tamanhos de buckets são significativos dependendo de seus indicadores e do valor que deseja usar como base de corte na sua consulta escolhendo intervalos que correspondam ao limite superior ao seu indicador, este é um exemplo da flexibilidade de sistemas baseados em timeseries 
+
+Adicionando essa estratégia ao exemplo anterior:
 
 ```sh
 sum(rate(flask_http_request_duration_seconds_bucket{job="app", le="0.25", status!="500"}[5m])) /
 sum(rate(flask_http_request_duration_seconds_count{job="app",status!="500"}[5m])) * 100
 ```
 
-Ao sumarizar as métricas para construir SLIs é normal adicionar um agregador [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) para executar a soma dos resultados obtidos com diferentes labels;
+ANeste calculo também usamos outra característica do prometheus a função [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) que é um agregador;
 
 
 ---
