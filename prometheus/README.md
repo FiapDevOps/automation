@@ -1,6 +1,6 @@
 # Prometheus e Timeseries
 
-Deploy a python app usando prometheus como ferramenta de monitoração
+Apresentando o conceito de timeseries usando o prometheus;
 
 ![alt tag](https://raw.githubusercontent.com/FiapDevOps/observability/f8ccc0419face4b2b99aea68536d21551c699bc7/img-src/prometheus_logo.png)
 
@@ -41,9 +41,11 @@ terraform apply
 
 | descrição                       | path                             |
 |---------------------------------|----------------------------------|
-| Interface do prometheus         | \<IP-APP>:80                     |
-| Acesso na App de testes         | \<IP-APP>:8080                   |
-| Scrape de métricas              | \<IP-APP>:8080/metrics           |
+| Interface do prometheus                     | \<prometheus_public_ip>:80                             |
+| Acesso na App de testes                     | \<prometheus_public_ip>:8080                           |
+| Scrape de métricas                          | \<prometheus_public_ip>:8080/metrics                   |
+| Scrape de métricas do sistema operacional   | \<prometheus_public_ip>:9100/metrics                   |
+
 
 ---
 
@@ -66,72 +68,11 @@ cat $HOME/environment/automation/prometheus/iac/build/src/app.py
 
 ---
 
-# Criando uma regra de alerta
-
-No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
-
-3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
-
-3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
-
-```sh
-cd /home/ubuntu/automation/prometheus
-cat rules.yml
-```
-
-3.3 Adicione uma nova regra de alerta neste arquivo:
-
-```sh
-
-cat <<EOF >> rules.yml
-
-      - alert: NodeExporterDown
-        expr: up{job="node"} != 1
-        for: 5m
-        labels:
-          severity: high
-        annotations:
-          summary: The Node exporter metrics is down at $labels.instance
-EOF
-```
-
-3.4 Como a alteração foi executada após o build utilize o docker-compose para reconfigurar a nossa stack:
-
-```sh
-docker-compose restart
-```
-
-3.5 Com este processo temos uma regra especifica para validar a disponibilidade do job "node"responsável pelo node-exporter, simule uma falha no componente e acompanha o alerta pela interface do prometheus:
-
-```sh
-docker kill prometheus_node-exporter_1
-```
-
----
-
-## Configurando um cenário com service discovery:
-
-
-
-```sh
-  - job_name: 'node_ec2_job'
-    ec2_sd_configs:
-      - region: us-east-1
-        access_key: ACCESS_KEY
-        secret_key: SECRET_KEY
-        port: 9100
-    relabel_configs:
-      - source_labels: [__meta_ec2_instance_id]
-        target_label: instance
-```
-
----
-
-# Indicando as métricas para os SLIs:
+# Testando as métricas
 
 No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e exportando métricas, dados que serão usados para produzir alguns exemplos de SLI, acesse a URL da sua stack na porta 8080:
 
-2.1 Considere uma métrica simples filtrando requisições http com base no status code:
+3.1 Considere uma métrica simples filtrando requisições http com base no status code:
 
 ```sh
 flask_http_request_total{status=~"2.."}
@@ -139,7 +80,7 @@ flask_http_request_total{status=~"2.."}
 
 Nesta métrica usamos a função [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) que considera um intervalo de tempo e um contador como parâmetros para calcular uma "taxa por segundo";
 
-2.2 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
+3.2 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
 
 ```sh
 rate(flask_http_request_total{status=~"5.."}[5m])
@@ -192,6 +133,65 @@ sum(rate(flask_http_request_duration_seconds_count{job="app",status!="500"}[5m])
 
 ANeste calculo também usamos outra característica do prometheus a função [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) que é um agregador;
 
+---
+
+# Criando uma regra de alerta
+
+No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
+
+3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
+
+3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
+
+```sh
+cd /home/ubuntu/automation/prometheus
+cat rules.yml
+```
+
+3.3 Adicione uma nova regra de alerta neste arquivo:
+
+```sh
+
+cat <<EOF >> rules.yml
+
+      - alert: NodeExporterDown
+        expr: up{job="node"} != 1
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: The Node exporter metrics is down at $labels.instance
+EOF
+```
+
+3.4 Como a alteração foi executada após o build utilize o docker-compose para reconfigurar a nossa stack:
+
+```sh
+docker-compose restart
+```
+
+3.5 Com este processo temos uma regra especifica para validar a disponibilidade do job "node"responsável pelo node-exporter, simule uma falha no componente e acompanha o alerta pela interface do prometheus:
+
+```sh
+docker kill prometheus_node-exporter_1
+```
+
+---
+
+## Configurando um cenário com service discovery:
+
+
+```sh
+  - job_name: 'node_ec2_job'
+    ec2_sd_configs:
+      - region: us-east-1
+        access_key: ACCESS_KEY
+        secret_key: SECRET_KEY
+        port: 9100
+    relabel_configs:
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance
+```
 
 ---
 ##### Fiap - MBA DevOps Enginnering | SRE
