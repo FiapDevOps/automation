@@ -252,10 +252,9 @@ docker-compose restart
 4.4 Acesse a interface web e verifique o novo job em ação no ip da instancia de prometheus acessando a URL /service-discovery
 
 Uma documentação detalhada deste setup pode ser consultada neste link [Automatically monitoring EC2 Instances](https://www.robustperception.io/automatically-monitoring-ec2-instances);
-        target_label: instance
-```
 
 ---
+
 ##### Fiap - MBA DevOps Enginnering | SRE
 profhelder.pereira@fiap.com.br
 
