@@ -1,6 +1,6 @@
 # Prometheus e Timeseries
 
-Deploy a python app usando prometheus como ferramenta de monitoração
+Apresentando o conceito de timeseries usando o prometheus;
 
 ![alt tag](https://raw.githubusercontent.com/FiapDevOps/observability/f8ccc0419face4b2b99aea68536d21551c699bc7/img-src/prometheus_logo.png)
 
@@ -41,9 +41,11 @@ terraform apply
 
 | descrição                       | path                             |
 |---------------------------------|----------------------------------|
-| Interface do prometheus         | \<IP-APP>:80                     |
-| Acesso na App de testes         | \<IP-APP>:8080                   |
-| Scrape de métricas              | \<IP-APP>:8080/metrics           |
+| Interface do prometheus                     | \<prometheus_public_ip>:80                             |
+| Acesso na App de testes                     | \<prometheus_public_ip>:8080                           |
+| Scrape de métricas                          | \<prometheus_public_ip>:8080/metrics                   |
+| Scrape de métricas do sistema operacional   | \<prometheus_public_ip>:9100/metrics                   |
+
 
 ---
 
@@ -102,7 +104,7 @@ Métricas sobre o uso de Filesystem: [Filesystem metrics from the node exporter]
 
 No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e exportando métricas, dados que serão usados para produzir alguns exemplos de SLI, acesse a URL da sua stack na porta 8080:
 
-2.1 Considere uma métrica simples filtrando requisições http com base no status code:
+3.1 Considere uma métrica simples filtrando requisições http com base no status code:
 
 ```sh
 flask_http_request_total{status=~"2.."}
@@ -110,7 +112,7 @@ flask_http_request_total{status=~"2.."}
 
 Nesta métrica usamos a função [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) que considera um intervalo de tempo e um contador como parâmetros para calcular uma "taxa por segundo";
 
-2.2 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
+3.2 Melhorando a estratégia poderíamos filtrar apenas requisições com status code 500, o que provavelmente se aproximaria mais de um cenário onde a falha relativa ao serviço é vinculada a comportamento inesperado em um backend.
 
 ```sh
 rate(flask_http_request_total{status=~"5.."}[5m])
@@ -224,6 +226,8 @@ cat prometheus.yml
 ```sh
 cat <<EOF >> prometheus.yml
 
+
+```sh
   - job_name: 'node_ec2_job'
     ec2_sd_configs:
       - region: us-east-1
@@ -234,7 +238,7 @@ cat <<EOF >> prometheus.yml
       - source_labels: [__meta_ec2_instance_id]
         target_label: ec2_instance_id
       - source_labels: [__meta_ec2_tag_environment]
-        target_label: ec2_instance_env       
+        target_label: ec2_instance_env
 
 EOF
 ```
@@ -248,6 +252,8 @@ docker-compose restart
 4.4 Acesse a interface web e verifique o novo job em ação no ip da instancia de prometheus acessando a URL /service-discovery
 
 Uma documentação detalhada deste setup pode ser consultada neste link [Automatically monitoring EC2 Instances](https://www.robustperception.io/automatically-monitoring-ec2-instances);
+        target_label: instance
+```
 
 ---
 ##### Fiap - MBA DevOps Enginnering | SRE
