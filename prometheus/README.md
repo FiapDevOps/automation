@@ -51,83 +51,54 @@ terraform apply
 
 Para testar o modelo de timeseries e sua flexibilidade considere os seguintes pontos:
 
-2.1 A versão original da aplicação é um projeto python usando flask preparado para construção em container, um modelo de construção similar pode ser obtido para estudo no portal Real Python: [https://realpython.com/flask-by-example-part-1-project-setup/](https://realpython.com/flask-by-example-part-1-project-setup/);
+A versão original da aplicação é um projeto python usando flask preparado para construção em container, um modelo de construção similar pode ser obtido para estudo no portal Real Python: [https://realpython.com/flask-by-example-part-1-project-setup/](https://realpython.com/flask-by-example-part-1-project-setup/);
 
-2.2. Nesta versão da aplicação foi adicionada uma biblioteca para construção das métricas no prometheus, o [prometheus-flask-exporter](https://pypi.org/project/prometheus-flask-exporter/), acessível a partir do endpoit /metrics ele será um dos responsáveis por gerar pontos de timeseries;
+Nesta versão da aplicação foi adicionada uma biblioteca para construção das métricas no prometheus, o [prometheus-flask-exporter](https://pypi.org/project/prometheus-flask-exporter/), acessível a partir do endpoit /metrics ele será um dos responsáveis por gerar pontos de timeseries;
 
-2.3 Uma cópia deste padrão pode ser consultada no diretório build da pasta prometheus:
+Uma cópia deste padrão pode ser consultada no diretório build da pasta prometheus:
 
 ```sh
 ls $HOME/environment/automation/prometheus/iac/build
 cat $HOME/environment/automation/prometheus/iac/build/src/app.py
 ```
 
-2.4 Para gerar a app será utilizado uma imagem criada com base neste build disponível no Dockerhub [https://hub.docker.com/r/devfiap/python-flask-app](https://hub.docker.com/r/devfiap/python-flask-app);
+Para gerar a app será utilizado uma imagem criada com base neste build disponível no Dockerhub [https://hub.docker.com/r/devfiap/python-flask-app](https://hub.docker.com/r/devfiap/python-flask-app);
 
 ---
 
-# Criando uma regra de alerta
+# Desbravando métricas sobre o uso recursos:
 
-No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
+Para monitorar o uso de recursos usando timeseries, no caso do prometheus o node-exporter é geralmente escolha para fornecimento dos dados, ele foi implementado em nosso ambiente com scrape de metricas para a porta 9100 na path /metrics;
 
-3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
-
-3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
+Um  exemplo simples seria uma consulta direta aos pontos usando a função rate do prometheus para obter a média:
 
 ```sh
-cd /home/ubuntu/automation/prometheus
-cat rules.yml
+rate(node_cpu_seconds_total{mode="system"}[1m])
 ```
 
-3.3 Adicione uma nova regra de alerta neste arquivo:
+Outra possibilidade agora para avaliação sobre o uso de memória seria o ponto node_memory_MemAvailable_bytes:
 
 ```sh
-
-cat <<EOF >> rules.yml
-
-      - alert: NodeExporterDown
-        expr: up{job="node"} != 1
-        for: 5m
-        labels:
-          severity: high
-        annotations:
-          summary: The Node exporter metrics is down at $labels.instance
-EOF
+node_memory_MemAvailable_bytes/1024/1024
 ```
 
-3.4 Como a alteração foi executada após o build utilize o docker-compose para reconfigurar a nossa stack:
+> Como o valor original foi configurado na métrica em bytes existe um processo de conversão, por isso a divisão por 1024 duas vezes;
+
+Toda métrica de timeseries é baseada em uma informação de um momento no tempo, por isso em casos onde o histórico é importante é comum transformar esses dados em gráficos, mas é possível executar consultas usando funções para tratar esses dados como o [offset](https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier);
 
 ```sh
-docker-compose restart
+node_memory_MemAvailable_bytes/1024/1024 offset 10m
 ```
 
-3.5 Com este processo temos uma regra especifica para validar a disponibilidade do job "node"responsável pelo node-exporter, simule uma falha no componente e acompanha o alerta pela interface do prometheus:
+Outros exemplo interessantes podem ser consultados nos endereços abaixo:
 
-```sh
-docker kill prometheus_node-exporter_1
-```
+Métricas sobre o uso de CPU: [Understanding Machine CPU usage](https://www.robustperception.io/understanding-machine-cpu-usage)
+
+Métricas sobre o uso de Filesystem: [Filesystem metrics from the node exporter](https://www.robustperception.io/filesystem-metrics-from-the-node-exporter)
 
 ---
 
-## Configurando um cenário com service discovery:
-
-
-
-```sh
-  - job_name: 'node_ec2_job'
-    ec2_sd_configs:
-      - region: us-east-1
-        access_key: ACCESS_KEY
-        secret_key: SECRET_KEY
-        port: 9100
-    relabel_configs:
-      - source_labels: [__meta_ec2_instance_id]
-        target_label: instance
-```
-
----
-
-# Indicando as métricas para os SLIs:
+# Testando métricas de aplicação:
 
 No modelo entregue temos uma aplicação web, respondendo a requisições HTTP e exportando métricas, dados que serão usados para produzir alguns exemplos de SLI, acesse a URL da sua stack na porta 8080:
 
@@ -192,6 +163,91 @@ sum(rate(flask_http_request_duration_seconds_count{job="app",status!="500"}[5m])
 
 ANeste calculo também usamos outra característica do prometheus a função [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) que é um agregador;
 
+---
+
+# Criando uma regra de alerta
+
+No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
+
+3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
+
+3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
+
+```sh
+cd /home/ubuntu/automation/prometheus
+cat rules.yml
+```
+
+3.3 Adicione uma nova regra de alerta neste arquivo:
+
+```sh
+
+cat <<EOF >> rules.yml
+
+      - alert: NodeExporterDown
+        expr: up{job="node"} != 1
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: The Node exporter metrics is down at $labels.instance
+EOF
+```
+
+3.4 Como a alteração foi executada após o build utilize o docker-compose para reconfigurar a nossa stack:
+
+```sh
+docker-compose restart
+```
+
+3.5 Com este processo temos uma regra especifica para validar a disponibilidade do job "node"responsável pelo node-exporter, simule uma falha no componente e acompanha o alerta pela interface do prometheus:
+
+```sh
+docker kill prometheus_node-exporter_1
+```
+
+---
+
+## Configurando um cenário com service discovery:
+
+Dentro da arquitetura DevOps um conceito importante na monitoração de serviços é a agilidade, uma alternativa para conseguir esse objetivo é trabalhar com cenários de service discovery;
+
+4.1 Em nosso lab iremos configurar um novo job usando as credenciais da AWS para identificar automaticamente novos resources ec2, para isso execute o seguinte processo:
+
+```sh
+cd /home/ubuntu/automation/prometheus
+cat prometheus.yml
+```
+
+4.2 Ao final do arquivo adicione a configuração do novo job:
+
+```sh
+cat <<EOF >> prometheus.yml
+
+  - job_name: 'node_ec2_job'
+    ec2_sd_configs:
+      - region: us-east-1
+        access_key: ACCESS_KEY
+        secret_key: SECRET_KEY
+        port: 9100
+    relabel_configs:
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: ec2_instance_id
+      - source_labels: [__meta_ec2_tag_environment]
+        target_label: ec2_instance_env       
+
+EOF
+```
+
+4.3 Utilize o docker-compose para reconfigurar a nossa stack:
+
+```sh
+docker-compose restart
+```
+
+4.4 Acesse a interface web e verifique o novo job em ação no ip da instancia de prometheus acessando a URL /service-discovery
+
+Uma documentação detalhada deste setup pode ser consultada neste link [Automatically monitoring EC2 Instances](https://www.robustperception.io/automatically-monitoring-ec2-instances);
 
 ---
 ##### Fiap - MBA DevOps Enginnering | SRE
