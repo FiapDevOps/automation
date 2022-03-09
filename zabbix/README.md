@@ -43,7 +43,10 @@ As Actions são efetivamente o processo de alerta e de tarefas executadas a part
 3.0 Para criar a aplicação de teste utilize o terraform aplicando a configuração do diretório monitored_app:
 
 ```sh
-cd ~/environment/automation/zabbix/monitored_app
+cd ~/environment/automation
+git pull
+cd zabbix/monitored_app
+rm -rf .terraform
 terraform init
 terraform apply 
 ```

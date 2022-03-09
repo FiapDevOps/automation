@@ -11,11 +11,6 @@ terraform {
       version = "~> 3.0"
     }
   }
-  backend "s3" {
-    bucket = "terraform-b8a4f75a6ba543ffb8f771a49b5f116c"
-    key    = "monitoring"
-    region = "us-east-1"
-  }
 }
 
 # Configurando o cloud provider
