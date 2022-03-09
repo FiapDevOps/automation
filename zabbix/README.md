@@ -56,7 +56,7 @@ terraform apply
 
 | Campo | Valor |
 |-------|-------|
-| Host name  | host-12345 (Utilize o seu rm apenas números como identificador no lugar de 12345) |
+| Host name  | app-mediawiki-12345 (Utilize o seu rm apenas números como identificador no lugar de 12345) |
 | Groups:    | Linux Servers |
 | Interfaces | Agent (Clique no botão **Add** e selecione a opção **Agent**, especifique o endereço IP público da instância gerada via terraform) |
 
@@ -70,7 +70,7 @@ terraform apply
 
 Prosseguiremos deste ponto configurando um novo Item de monitoração;
 
-3.2 Para criar um Item de monitoração clique sobre o nome Items ao lado do nome do Host recém-criado (Segundo coluna com base na imagem acima);
+3.2 Para criar um Item de monitoração clique sobre o nome Items ao lado do nome do Host recém-criado (Segunda coluna com base na imagem acima);
 
 3.3 No menu seguinte clique no botão "create Item" localizado no canto superior direito da tela;
 
@@ -109,6 +109,8 @@ Ao final do processo a interface exibira dois items configurados conforme a imag
 | Severity | Warning |
 | Expression | last(/app-mediawiki-12345/agent.ping)=0 or nodata(/app-mediawiki-12345/agent.ping,300)=1 |
 
+**Substitua o nome do host de acordo com o host configurado no seu teste**
+
 Se precisar copie e coloque a expressão diretamente no campo Expression:
 
 ```sh
@@ -120,7 +122,7 @@ last(/app-mediawiki-12345/agent.ping)=0 or nodata(/app-mediawiki-12345/agent.pin
 > É possível disparar o gatilho dessa expressão apenas desligando o agent, para isso a partir da instância da aplicação pare o serviço usando systemctl com o comando:
 
 ```sh
-systemctl stop zabbix-agent2
+sudo systemctl stop zabbix-agent2
 ```
 
 > Depois de alguns minutos acesse no menu no canto direito da tela a opção Monitoring -> Problems;
@@ -147,22 +149,6 @@ Ao final do processo teremos um layout similar ao do exemplo abaixo:
 Após este processo verifique novamente e explore a relação de triggers e items do Host
 
 6.4 Para verificar os novos dados coletados no menu no canto direito da tela selecione "Monitoring" -> "Latest data"
-
-6.5 Embora não seja o cenário ideal é possível criar triggers especificas a partir dos dados recebidos via Docker template:
-
-| Campo | Valor |
-|-------|-------|
-| Name | mediawiki_container_service_not_running |
-| Severity | High |
-| Expression | last(/app-mediawiki-12345/docker.container_info.state.running["/mediawiki"])= 0 or nodata(/app-mediawiki-12345/docker.container_info.state.running["/mediawiki"],300)=1 |
-
-
-> É possível disparar o gatilho dessa expressão apenas desligando o agent, para isso a partir da instancia da aplicação pare o serviço usando systemctl com o comando:
-
-```sh
-systemctl stop mediawiki
-systemctl disable mediawiki
-```
 
 ---
 
