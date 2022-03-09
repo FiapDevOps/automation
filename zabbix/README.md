@@ -2,19 +2,19 @@
 
 ![ZABBIX_00](images/ZABBIX_00.png)
 
-Apresentar um cenário com o Zabbix como solução de monitoração centralizada para uma arquitetura simples com uma aplicação no padrão lamp;
+Apresentar um cenário com o Zabbix como solução de monitoração centralizada para uma arquitetura simples com uma aplicação simples em Docker;
 
 # Caracteriísticas:
 
 Neste laboratório o zabbix será apresentado no seguinte padrão
 
 - Utilizaremos uma infraestrutura centralizada para facilitar a administração, o ambiente será disponibilizado na URL http://zabbix.fiaplabs.com/ as credenciais de acesso serão fornecidas durante o laboratório;
-- Criaremos uma configuração explorando templates para monitoração do Sistema Operacional dos servidores com a aplicação Lamp;
+- Criaremos uma configuração explorando templates para monitoração do Sistema Operacional dos servidores com a aplicação docker;
 
 
 # Item 1: Instalação do Zabbix
 
-Neste laboratório o ambiente já foi configurado, foi usado a versão 5.4 do Zabbix com base no processo de instalação descrito nos endereços abaixo:
+Neste laboratório o ambiente já foi configurado usando a versão 6 do Zabbix com base no processo de instalação descrito nos endereços abaixo:
 
 - [Documentação oficial de instalação do Postgres](https://www.postgresql.org/download/linux/ubuntu/)
 - [Documentação oficial de instalação do Zabbix](https://www.zabbix.com/download?zabbix=5.4&os_distribution=ubuntu&os_version=20.04_focal&db=postgresql&ws=nginx)
@@ -30,13 +30,13 @@ Diferente do modelo de timeseries testado no cenário com o prometheus, no zabbi
 Os hosts são organizados com base em grupos identificados como **Hosts Groups**
 
 ## Items
-Após a configuração de um host e necessário definir quais os tipos de métricas a serem coletadas, essa definição é chamada de **Item** esses items são configurados com base em **Keys** aqui temos um paralelo direto ao timeseries, uma Key é essencialmente uma expressão lógica com uma informação a ser coletada, como consumo de CPU ou uso total de disco por exemplo;
+Após a configuração de um host é necessário definir quais as métricas a serem coletadas, essa definição é chamada **Item**, esses items são configurados com base em **Keys** aqui temos um paralelo direto ao timeseries, uma Key é essencialmente uma expressão lógica com uma informação a ser coletada, como consumo de CPU ou uso total de disco, por exemplo;
 
 ## Triggers
-As triggers também são identificadas como problem expression e basicamente seguem o mesmo conceito em qualquer plataforma de monitoração, elas definem qual a consulta e resposta (trigger expression) que indentificam um problema e sua respectiva severidade;
+As triggers também são identificadas como problem expression e basicamente seguem o mesmo conceito em qualquer plataforma de monitoração, elas definem qual a consulta e resposta (trigger expression) que identificam um problema e sua respectiva severidade;
 
 ## Actions
-As Actions são efetivamente o processo de alerta e de tarefas executadas a partir do disparado de triggers com base em condições e operações ou ações que devem ser executadas, uma action pode ser usada para alertar um plantonista com base no envio de email ou Post em uma plataforma como o Teams ou Slack.
+As Actions são efetivamente o processo de alerta e de tarefas executadas a partir do disparado de triggers com base em condições e operações ou ações que devem ser executadas, uma action pode ser usada para alertar um plantonista com base no envio de e-mail ou Post em uma plataforma como o Telegram ou Slack.
 
 # Item 3: Configuração prática de um host
 
@@ -48,17 +48,17 @@ terraform init
 terraform apply 
 ```
 
-3.1 Acesse o Zabbix configurado previamente para a aula na URL: [http://zabbix.fiaplbas.com](http://zabbix.fiaplbas.com), no painel de administração do Zabbix acesse o menu no canto direito da tela, escolha as opções:
+3.1 Acesse o Zabbix configurado previamente para a aula na URL: [http://zabbix.fiaplabs.com](http://zabbix.fiaplabs.com), no painel de administração do Zabbix acesse o menu no canto direito da tela, escolha as opções:
 
 3.2 Configuration -> Hosts -> Create Hosts (Utilize o botão no canto superior direito)
 
-3.3 Configure o Host adicionando os parametros abaixo (Mantenha em branco os campos não selecionados)
+3.3 Configure o Host adicionando os parâmetros abaixo (Mantenha em branco os campos não selecionados)
 
 | Campo | Valor |
 |-------|-------|
 | Host name  | host-12345 (Utilize o seu rm apenas números como identificador no lugar de 12345) |
 | Groups:    | Linux Servers |
-| Interfaces | Agent (Clique no botão Add e selecione a opção **Agent**, especifique o endereço IP publico da instancia gerada via terraform) |
+| Interfaces | Agent (Clique no botão **Add** e selecione a opção **Agent**, especifique o endereço IP público da instância gerada via terraform) |
 
 3.4 Mantenha os outros campos com o valor atual e ao final do processo clique no botão **Add**
 
@@ -68,13 +68,13 @@ terraform apply
 
 ![ZABBIX_01](images/ZABBIX_01.png)
 
-Proseguiremos deste ponto configurando um novo Item de monitoração;
+Prosseguiremos deste ponto configurando um novo Item de monitoração;
 
-3.2 Para criar um Item de monitoração clique sobre o nome Items ao lado do nome do Host recém criado (Segundo coluna com base na imagem acima);
+3.2 Para criar um Item de monitoração clique sobre o nome Items ao lado do nome do Host recém-criado (Segundo coluna com base na imagem acima);
 
 3.3 No menu seguinte clique no botão "create Item" localizado no canto superior direito da tela;
 
-3.4 Nesta etapa preencha os campos de acordo com os valores listados abaixo:
+3.4 Nesta etapa preencha os campos conforme os valores listados abaixo:
 
 | Campo | Valor |
 |-------|-------|
@@ -97,9 +97,9 @@ Ao final do processo a interface exibira dois items configurados conforme a imag
 
 # Item 5: Configurando triggers para problemas
 
-5.1 Para criar uma trigger volte ao menu  Configuration -> Hosts e na linha relativa ao nosso host recém configurado clique sobre o nome Triggers (Terceira coluna com base na imagem acima);
+5.1 Para criar uma trigger volte ao menu  Configuration -> Hosts e na linha relativa ao nosso host recém-configurado clique sobre o nome Triggers (Terceira coluna com base na imagem acima);
 
-5.2 No menu seguinte clique no botão "create Trigger" localizado no canto superior direito da tela, preencha os campos de acordo com a imagem abaixo:
+5.2 No menu seguinte clique no botão "create Trigger" localizado no canto superior direito da tela, preencha os campos conforme a imagem abaixo:
 
 ![ZABBIX_02](images/ZABBIX_03.png)
 
@@ -117,7 +117,7 @@ last(/app-mediawiki-12345/agent.ping)=0 or nodata(/app-mediawiki-12345/agent.pin
 
 5.3 Ao final do processo clique no botão **Add**
 
-> É possível disparar o gatilho dessa expressão apenas desligando o agent, para isso a partir da instancia da aplicação pare o serviço usando systemctl com o comando:
+> É possível disparar o gatilho dessa expressão apenas desligando o agent, para isso a partir da instância da aplicação pare o serviço usando systemctl com o comando:
 
 ```sh
 systemctl stop zabbix-agent2
@@ -127,7 +127,7 @@ systemctl stop zabbix-agent2
 
 # Item 6: Trabalhando com templates
 
-Dentro da lógica de monitoração via zabbix o processo de criação manual de items pode ser substituido pela [https://www.zabbix.com/documentation/current/en/manual/config/templates](aplicação de templates), um template é uma relação de entidades que pode entregar um modelo pronto para Items, Triggers, dashboards e etc.
+Na lógica de monitoração via zabbix o processo de criação manual de items pode ser substituído pela [https://www.zabbix.com/documentation/current/en/manual/config/templates](aplicação de templates), um template é uma relação de entidades que pode entregar um modelo pronto para Items, Triggers, dashboards, etc.
 
 6.1 Em nosso cenário iremos adicionar dois templates ao host configurado recentemente, para isso a partir do menu principal acesse Configuration -> Hosts -> Clique sobre o nome do host criado recentemente;
 
@@ -136,7 +136,7 @@ Dentro da lógica de monitoração via zabbix o processo de criação manual de 
  - Linux by Zabbix agent
  - Docker by Zabbix agent 2
 
-O primeiro template ser]a utilizado para obter métricas e triggers customizadas com base em sistemas operacionais linux enquanto o segundo template será utilizado para obter métricas da nossa aplicação de teste configurada usando [docker](https://www.zabbix.com/integrations/docker);
+O primeiro template será utilizado para obter métricas e triggers customizadas com base em sistemas operacionais linux enquanto o segundo template será utilizado para obter métricas da nossa aplicação de teste configurada usando [docker](https://www.zabbix.com/integrations/docker);
 
 Ao final do processo teremos um layout similar ao do exemplo abaixo:
 
