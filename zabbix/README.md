@@ -170,9 +170,10 @@ systemctl disable mediawiki
 
 6.1 Acesse o menu a esquerda da tela e escolha a opção Configuration -> Actions -> Trigger Actions;
 
-6.2 Clique no botão "Create Action" no canto superior direito da tela selecione a opção "Monitoring" -> "Latest data", digite o nome do host escolhido no campo "Hosts" e aplique o filtro clicando em "Apply"
+6.2 Verifique os detalhes da configuração de envio de alertas no item "Report to telegram", esse setup foi configurado conforme a documentação [Integração com o Telegram](https://www.zabbix.com/integrations/telegram);
 
 ---
+
 ##### Fiap - MBA DEVOPS Engineering
 profhelder.pereira@fiap.com.br
 
