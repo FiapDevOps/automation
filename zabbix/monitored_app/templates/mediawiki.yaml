@@ -1,0 +1,53 @@
+#cloud-config
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+  
+write_files:
+-   content: |
+        # This is a configuration file for Zabbix agent 2 (Unix)
+        # To get more information about Zabbix, visit http://www.zabbix.com
+
+        Server=zabbix.fiaplabs.com
+        ServerActive=zabbix.fiaplabs.com
+        Hostname=
+
+    path: /etc/zabbix/zabbix_agent2.d/agent-lab.conf
+
+-   content: |
+        # /etc/systemd/system/mediawiki.service
+        
+        [Unit]
+        Description=Mediawiki
+        After=docker.service
+        Wants=docker.service
+        
+        [Service]
+        Restart=always
+        RestartSec=10s
+        ExecStartPre=-/usr/bin/docker rm mediawiki
+        ExecStart=/usr/bin/docker run \
+                  --name mediawiki \
+                  --net host \
+                  mediawiki:stable
+        ExecStop=/usr/bin/docker stop mediawiki
+        ExecStopPost=/usr/bin/docker rm mediawiki
+        
+        [Install]
+        WantedBy=multi-user.target
+    path: /etc/systemd/system/mediawiki.service
+
+runcmd:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-1+ubuntu20.04_all.deb -P /tmp/
+  - dpkg -i /tmp/zabbix-release_6.0-1+ubuntu20.04_all.deb
+  - apt-get update -y && apt-get install -y docker-ce docker-ce-cli containerd.io zabbix-agent2
+  - usermod -aG docker zabbix
+  - systemctl dameon-reload
+  - systemctl start docker && systemctl enable docker
+  - systemctl start zabbix-agent2 && systemctl enable zabbix-agent2 
+  - systemctl start mediawiki && systemctl enable mediawiki
