@@ -18,7 +18,6 @@ Neste laboratório o ambiente já foi configurado usando a versão 6 do Zabbix c
 
 - [Documentação oficial de instalação do Postgres](https://www.postgresql.org/download/linux/ubuntu/)
 - [Documentação oficial de instalação do Zabbix](https://www.zabbix.com/download?zabbix=5.4&os_distribution=ubuntu&os_version=20.04_focal&db=postgresql&ws=nginx)
-- [Documentação de instalação do Granafa](https://grafana.com/docs/grafana/latest/installation/debian/)
 - [Configurando um cenário com autoregistration](https://www.zabbix.com/documentation/2.0/en/manual/discovery/auto_registration)
 - [Integração com o Telegram](https://www.zabbix.com/integrations/telegram)
 
