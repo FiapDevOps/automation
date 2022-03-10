@@ -1,7 +1,5 @@
 # Challenge:
 
-![JENKINS_01](images/JENKINS_01.PNG)
-
 **Objetivo:** Implementar a solução de CI/CD [Jenkins](https://www.jenkins.io/doc/book/installing/) de acordo com os paterns de arquitetura a seguir:
 
 * A infraestrutura deve ser construída com base no conceito *"infrastructure-as-code"* utilizando um *"cloud provider"* de sua escolha;
