@@ -9,17 +9,17 @@ terraform {
 
 data "aws_vpc" "my_vpc" {
   tags = {
-    Terraform = "true"
-    Environment = "lab"
+    terraform = "true"
+    env       = "lab"
   }
 }
 
 data "aws_security_group" "selected" {
   vpc_id      = data.aws_vpc.my_vpc.id
   tags = {
-    Terraform = "true"
-    Environment = "lab"
-    Tier = "FE"
+    terraform = "true"
+    env       = "lab"
+    tier      = "FE"
   }
 }
 
@@ -32,7 +32,8 @@ resource "aws_instance" "docker-instance" {
   
     tags = {
         Name        = "docker-instance"
-        Terraform   = "true"
-        Imutable    = "true"
+        terraform   = "true"
+        imutable    = "true"
+        env         = "lab"
     }
 }

@@ -92,7 +92,7 @@ resource "aws_instance" "monitoring_app" {
 
     tags = {
         terraform   = "true"
-        environment = "lab"
+        env         = "lab"
         tier        = "defaut"
     }
 }
@@ -107,8 +107,8 @@ resource "aws_instance" "single_app" {
     count                       = 0
 
     tags = {
-        terraform   = "true"
-        environment = "lab"
-        tier        = "defaut"
+        terraform = "true"
+        env       = "lab"
+        tier      = "defaut"
     }
 }

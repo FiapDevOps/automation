@@ -15,7 +15,7 @@ provider "aws" {
 data "aws_vpc" "main" {
   tags = {
     terraform = "true"
-    environment = "lab"
+    env       = "lab"
   }
 }
 
@@ -28,7 +28,7 @@ data "aws_security_groups" "selected" {
   
   tags = {
     terraform = "true"
-    environment = "lab"
+    env = "lab"
   }
 }
 
@@ -42,7 +42,7 @@ data "aws_subnet_ids" "selected" {
 
   tags = {
     terraform = "true"
-    environment = "lab"
+    env = "lab"
   }
 }
 
@@ -75,8 +75,8 @@ resource "aws_instance" "web_app" {
     subnet_id                   = each.value
   
     tags = {
-        terraform   = "true"
-        environment = "lab"
-        tier        = "public"
+        terraform = "true"
+        env       = "lab"
+        tier      = "public"
     }
 }

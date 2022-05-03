@@ -26,7 +26,7 @@ terraform {
 data "aws_vpc" "main" {
   tags = {
     terraform = "true"
-    environment = "lab"
+    env       = "lab"
   }
 }
 
@@ -71,7 +71,7 @@ resource "aws_security_group" "web_server_sg" {
   tags = {
     Name = "allow_web_server_access"
     terraform = "true"
-    environment = "lab"
+    env = "lab"
     tier = "public"
   }
 }
@@ -136,7 +136,7 @@ module "mysql_sg" {
 #  tags = { 
 #    Name = "allow_access_from_cloud9_sg"
 #    terraform = "true"
-#    environment = "lab"
-#    tier = "private"
+#    env       = "lab"
+#    tier      = "private"
 #  }
 #}

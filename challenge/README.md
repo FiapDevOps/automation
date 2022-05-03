@@ -1,6 +1,6 @@
 # Challenge:
 
-![JENKINS_01](images/JENKINS_01.PNG)
+![JENKINS_01](images/JENKINS_01.png)
 
 **Objetivo:** Implementar a solução de CI/CD [Jenkins](https://www.jenkins.io/doc/book/installing/) de acordo com os paterns de arquitetura a seguir:
 

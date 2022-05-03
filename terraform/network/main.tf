@@ -31,7 +31,7 @@ module "vpc" {
 
   tags = {
     terraform = "true"
-    environment = "lab"
+    env = "lab"
   }
 }
 
@@ -62,7 +62,7 @@ module "vpc" {
 #data "aws_route_tables" "rts" {
 #  tags = {
 #    terraform = "true"
-#    environment = "lab"
+#    env = "lab"
 #  }
 #}
 

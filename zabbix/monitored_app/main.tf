@@ -69,7 +69,7 @@ resource "aws_instance" "monitored_app" {
 
     tags = {
         terraform   = "true"
-        environment = "lab"
+        env         = "lab"
         tier        = "defaut"
         purpose     = "mediawiki"
         
