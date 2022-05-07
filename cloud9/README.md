@@ -13,32 +13,30 @@ Nesta configuração você fará a preparação da instância que utilizaremos p
 
 ![CLOUD9_05](images/CLOUD9_05.PNG)
 
-**Não aplique essas credenciais até que seja solicitado nas próximas etapas do laboratório**
-
 ---
 ## 2. Configuração do repositórios e feramentas de trabalho;
 
 Nesta etapa faremos algumas configurações na instância de onde partirá as automações dos laboratórios práticos;
 
-2.1. Após finalizar o processo anterior um terminal será exibido dentro do Cloud9, faça uma cópia do [repositório git do laboratório](https://github.com/fiapdevops/automation) da disciplina;
+2.1. Após finalizar o processo anterior um terminal será exibido dentro do Cloud9, faça uma cópia do [repositório de configuração do ambiente](https://github.com/fiapdevops/cloud9) da disciplina;
 
 ```sh
 cd ~/environment
-git clone https://github.com/fiapdevops/automation
+git clone https://github.com/fiapdevops/cloud9
 ```
 
 2.2. Execute o script de instalção das ferramentas que serão usadas durante os laboratórios:
 
 ```sh
-chmod +x ~/environment/automation/cloud9/scripts/*.sh
+chmod +x ~/environment/cloud9/scripts/*.sh
 
-~/environment/automation/cloud9/scripts/config.sh
+~/environment/cloud9/scripts/config.sh
 ```
 
 2.3. Após a configuração execute o script de criação das chaves de SSH, elas serão necessário para acesso entre o host do cloud9 e as instâncias que criaremos noas laboratórios;
 
 ```sh
-~/environment/automation/cloud9/scripts/remote.sh
+~/environment/cloud9/scripts/remote.sh
 ```
 
 ---
