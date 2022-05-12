@@ -1,58 +1,20 @@
-# /*
-# Create a Cloud9 environment as a launcher platform to create another stuffs
-# Based on https://github.com/awslabs/aws-cloudformation-templates
-# Adapted from original file: https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/services/Cloud9/C9.yaml
-# */
-
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWS Cloud9 Environment with AWS CodeCommit Repository
+Description: AWS Lifecycle Instances function
 
 Parameters:
-
-  EC2InstanceType:
-    Description: EC2 instance type on which IDE runs
-    Type:        String
-    Default:     t2.medium
-    AllowedValues:
-      - t2.small
-      - t2.medium
-
-  AutoHibernateTimeout:
-    Description:  How many minutes idle before shutting down the IDE. Options, 30min, 1hr, 4hr, 1day, 1week, Never (0)
-    Type:         Number
-    Default:      240
-    AllowedValues:
-      - 30
-      - 60
-      - 240
-      - 1440
-      - 10080
-      - 0
-
-  RM:
-    Description:    Cloque o seu RM (Apenas os números), esse dado será usado em algumas Tags para facilitar a identificação.
-    Type:           String
-    Default:        "12345"
 
   Region:
     Default: us-east-1 
     Description: region only 1 region supported 
     Type: String
-  
+
   TerminateScheduled:
     Default: cron(0 5 * * ? *)
     Description: enter an Schedule expression example cron(0 18 ? * MON-FRI *) see https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
     Type: String
 
-Resources:
 
-  C9IDE:
-    Type: 'AWS::Cloud9::EnvironmentEC2'
-    Properties:
-      Name: !Sub '$rm-${RM}-Cloud9-IDE'
-      Description: !Sub '${RM} Cloud9 IDE'
-      AutomaticStopTimeMinutes: !Ref 'AutoHibernateTimeout'
-      InstanceType: !Ref 'EC2InstanceType'
+Resources:
 
   TerminateEC2Instances:
     Type: AWS::Lambda::Function
@@ -148,13 +110,3 @@ Resources:
         - 
           Arn: !GetAtt TerminateEC2Instances.Arn
           Id: "TargetFunctionV1"
-
-Outputs:
-
-  Cloud9URL:
-    Description: Cloud9 Environment
-    Value:
-      Fn::Join:
-      - ''
-      - - !Sub https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/
-        - !Ref 'C9IDE'
