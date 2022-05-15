@@ -36,7 +36,7 @@ echo $TARGET
 cat <<EOF > hosts
 [webserver]
 $TARGET
-
+EOF
 ```
 
 1.2.3 Por enquanto este será o nosso *Inventário estático** para que o ansible identifique onde rodar o proximo palybook:
@@ -54,34 +54,45 @@ ansible all -m ping -i hosts
 1.2.5 Após a conclusão do inventário crie nosso playbook simples para entrega do pacote do nginx:
 
 ```sh
-cat <<EOF > webserver.yml
+cat <<EOF > webserver-playbook.yml
+
 
 - hosts: webserver
   become: yes
   user: ubuntu
+
   tasks:
+    - name: Webserver | Add nginx apt signing key
+      ansible.builtin.apt_key:
+        url: "https://nginx.org/keys/nginx_signing.key"
+        state: present
+      
+    - name: Webserver | Add official nginx repository
+      ansible.builtin.apt_repository:
+        repo: 'deb http://nginx.org/packages/ubuntu/ focal nginx'
 
-    - name: update
-      apt: update_cache=yes   
-   
-    - name: Install Nginx
-      apt: name=nginx state=latest
-
+    - name: Webserver | Update repositories cache and install nginx
+      apt:
+        name: nginx
+        update_cache: yes
 
       notify:
-        - restart nginx
+        - Webserver | Restart nginx
 
   handlers:
-    - name: restart nginx
-      service: name=nginx state=reloaded
+    - name: Webserver | Restart nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: yes
 
-EOF
+
 ```
 
 1.2.6 Após a alteração execute o playbook para gerenciar a configuração na instância criada na etapa anterior:
 
 ```sh
-ansible-playbook webserver.yml -i hosts -v
+ansible-playbook webserver-playbook.yml -i hosts -v
 ```
 
 Existe uma documentação bem completa sobre boas práticas para a estruturar automação em ansible disponível na URL [https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices);
@@ -122,13 +133,13 @@ ansible-inventory -i inventory_aws_ec2.yml --graph
 2.1.2 Altere o arquivo site.yml para que o playbook faça referência ao grupo staging para determinar os hosts que serão configurados;
 
 ```sh
-sed -i 's/webserver/_lab/g' webserver.yml
+sed -i 's/webserver/_lab/g' webserver-playbook.yml
 ```
 
 2.1.3 Em seguida execute novamente o playbook usando o inventário dinâmico:
 
 ```sh
-ansible-playbook webserver.yml -i inventory_aws_ec2.yml -v
+ansible-playbook webserver-playbook.yml -i inventory_aws_ec2.yml -v
 ```
 
 2.1.4 Com esta configuração o ansible deve iterar sobre as duas instâncias inventariadas de acordo com a tag env:staging, para validar o comportamento volte na etapa anterior e execute o playbook ansible para criar uma segunda instância;

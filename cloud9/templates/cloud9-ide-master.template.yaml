@@ -149,11 +149,11 @@ Parameters:
       The number of minutes until the running instance is shut down after
       the environment has last been used.
     Type: Number
-    Default: 30
+    Default: 180
   EBSVolumeSize:
     Description: The desired size (in GB) of the Amazon EBS volume for your Cloud9 IDE.
     Type: Number
-    Default: 100
+    Default: 20
   EnableBastionStack:
     AllowedValues: ['true', 'false']
     Default: 'false'

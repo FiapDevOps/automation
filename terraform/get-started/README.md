@@ -44,7 +44,8 @@ provider "aws" {
 resource "aws_instance" "app_server" {
   ami           = "ami-0708edb40a885c6ee"
   instance_type = "t2.micro"
-  key_pair      = "id_lab"
+  key_name      = "id_lab"
+  subnet_id     = "my-subnet-id"
 
   tags = {
     Name = "ExampleAppServerInstance"
@@ -64,6 +65,29 @@ resource "aws_instance" "app_server" {
 
 Para o disparo da automação é necessário a referência sobre a ami ou imagem da instância que será entregue (em nosso exemplo Ubuntu 20.04), essa referência é um id unico baseado na região e pode ser localziada [usando o aws cli](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html#finding-an-ami-aws-cli) ou se preferir usando a [documentação do sistema operacional como neste caso](https://cloud-images.ubuntu.com/locator/ec2/);
 
+2.1.2 Antes de prosseguir identifique qual a subnet atual do projeto:
+
+```sh
+aws ec2 describe-subnets \
+    --filters Name=tag:Network,Values=Public \
+    --query 'Subnets[*].SubnetId' \
+    --output table
+```
+
+Utilize uma das subnets listadas no campo subnet_id substituindo o valor do parâmetro  **subnet_id** na **"my-subnet-id"** pela subnet identificada conforme modelo abaixo:
+
+```sh
+...
+
+resource "aws_instance" "app_server" {
+  ami           = "ami-0708edb40a885c6ee"
+  instance_type = "t2.micro"
+  key_name      = "id_lab"
+  subnet_id     = "my-subnet-id"
+
+...
+
+```
 
 2.2 Após salvar as alterações valide e dispare novamente a automação:
 
