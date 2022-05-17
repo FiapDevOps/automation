@@ -67,8 +67,7 @@ resource "aws_instance" "web_app" {
     ami                         = data.aws_ami.ubuntu.id
     instance_type               = "t3a.small"
     associate_public_ip_address = true    
-    user_data                   = "${file("templates/nginx.yaml")}"
-#   user_data                   = "${file("templates/mediawiki.yaml")}"
+    user_data                   = "${file("templates/mediawiki.yaml")}"
     vpc_security_group_ids      = tolist(data.aws_security_groups.selected.ids)
     key_name                    = "id_lab"
 
