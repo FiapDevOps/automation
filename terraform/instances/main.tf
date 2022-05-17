@@ -9,7 +9,7 @@ terraform {
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
 data "aws_vpc" "main" {
@@ -65,7 +65,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "web_app" {
   for_each                      = data.aws_subnet_ids.selected.ids
     ami                         = data.aws_ami.ubuntu.id
-    instance_type               = "t3a.medium"
+    instance_type               = "t3a.small"
     associate_public_ip_address = true    
     user_data                   = "${file("templates/nginx.yaml")}"
 #   user_data                   = "${file("templates/mediawiki.yaml")}"

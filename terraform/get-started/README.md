@@ -1,6 +1,6 @@
 # Objetivo
 
-![TERRAFORM_01](images/TERRAFORM_01.png)
+![TERRAFORM_01](../images/TERRAFORM_01.png)
 
 Apresentar o terraform para estudo de alguns conceitos sobre provisionamento e estado de automação;
 
@@ -40,11 +40,11 @@ terraform {
 
 provider "aws" {
   profile = "default"
-  region  = "us-east-1"
+  region  = "us-west-2"
 }
 
 resource "aws_instance" "app_server" {
-  ami           = "ami-0708edb40a885c6ee"
+  ami           = "ami-0ecb01759a1945ea3"
   instance_type = "t2.micro"
   key_name      = "id_lab"
   subnet_id     = "my-subnet-id"
@@ -59,7 +59,7 @@ resource "aws_instance" "app_server" {
 
 **Alterações em relação ao script original**
 
-- Nesta configuração o campo region foi alterado para a região em uso neste laboratório (us-east-1);
+- Nesta configuração o campo region foi alterado para a região em uso neste laboratório (us-west-2) na região Oregon;
 - O campo key_name foi adicionado com uma referência a chave criada durante a configuração do bastion host;
 - No campo tags adicionamos uma tag env = lab criando a tag de controle usada pelo script de remoção de recursos configurado junto com o bastion host;
 
@@ -67,31 +67,8 @@ resource "aws_instance" "app_server" {
 
 Para o disparo da automação é necessário a referência sobre a ami ou imagem da instância que será entregue (em nosso exemplo Ubuntu 20.04), essa referência é um id unico baseado na região e pode ser localziada [usando o aws cli](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html#finding-an-ami-aws-cli) ou se preferir usando a [documentação do sistema operacional como neste caso](https://cloud-images.ubuntu.com/locator/ec2/);
 
-2.1.2 Antes de prosseguir identifique qual a subnet atual do projeto:
 
-```sh
-aws ec2 describe-subnets \
-    --filters Name=tag:Network,Values=Public \
-    --query 'Subnets[*].SubnetId' \
-    --output table
-```
-
-Utilize uma das subnets listadas no campo subnet_id substituindo o valor do parâmetro  **subnet_id** na **"my-subnet-id"** pela subnet identificada conforme modelo abaixo:
-
-```sh
-...
-
-resource "aws_instance" "app_server" {
-  ami           = "ami-0708edb40a885c6ee"
-  instance_type = "t2.micro"
-  key_name      = "id_lab"
-  subnet_id     = "my-subnet-id"
-
-...
-
-```
-
-2.2 Após salvar as alterações inicie o terraform para que os modulos e dependencias sejam baixadas:
+2.2 Inicie o terraform para que os modulos e dependencias sejam baixadas:
 
 ```sh
 terraform init

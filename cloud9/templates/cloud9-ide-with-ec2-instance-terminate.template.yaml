@@ -12,10 +12,10 @@ Parameters:
   EC2InstanceType:
     Description: EC2 instance type on which IDE runs
     Type:        String
-    Default:     t2.small
+    Default:     t3.small
     AllowedValues:
-      - t2.small
-      - t2.medium
+      - t2.micro
+      - t3.small
 
   AutoHibernateTimeout:
     Description:  How many minutes idle before shutting down the IDE. Options, 30min, 1hr, 4hr, 1day, 1week, Never (0)
