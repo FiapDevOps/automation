@@ -19,6 +19,8 @@ git init
 2.1 Crie um arquivo main.tf
 
 ```sh
+mkdir terraform
+cd terraform
 touch main.tf
 ```
 
@@ -58,7 +60,7 @@ resource "aws_instance" "app_server" {
 **Alterações em relação ao script original**
 
 - Nesta configuração o campo region foi alterado para a região em uso neste laboratório (us-east-1);
-- O campo key_pair foi adicionado com uma referência a chave criada durante a configuração do bastion host;
+- O campo key_name foi adicionado com uma referência a chave criada durante a configuração do bastion host;
 - No campo tags adicionamos uma tag env = lab criando a tag de controle usada pelo script de remoção de recursos configurado junto com o bastion host;
 
 **Identifcação da AMI**
@@ -89,22 +91,33 @@ resource "aws_instance" "app_server" {
 
 ```
 
-2.2 Após salvar as alterações valide e dispare novamente a automação:
+2.2 Após salvar as alterações inicie o terraform para que os modulos e dependencias sejam baixadas:
+
+```sh
+terraform init
+```
+
+2.3 Antes de aplicar as mudanças é possível validar a estrutura do arquivo e verificar quais resources serão alterados usando os comandos validate e plab respectivamente:
 
 ```sh
 terraform validate
 terraform plan
+```
+
+2.4 Após validar dispare a automação:
+
+```sh
 terraform apply
 ```
 
-2.3 Verifique se a instância foi reconstruída de acordo com os parametros alterados:
+2.5 Verifique se a instância foi reconstruída de acordo com os parametros alterados:
 
 ```sh
 aws ec2 describe-instances     \
    --filters "Name=tag-value,Values=lab"
 ```
 
-2.4 Em caso afirmativo identifique o endereço da instância:
+2.6 Em caso afirmativo identifique o endereço da instância:
 
 ```sh
 TARGET=$(aws ec2 describe-instances     \
@@ -115,7 +128,7 @@ TARGET=$(aws ec2 describe-instances     \
 echo $TARGET
 ```
 
-2.4.1 Faça uma tentativa de acesso via SSH:
+2. Faça uma tentativa de acesso via SSH:
 
 ```sh
 ssh -l ubuntu $TARGET

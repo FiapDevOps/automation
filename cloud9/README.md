@@ -6,14 +6,9 @@ Nesta configuração você fará a preparação da instância que utilizaremos p
 
 1.1. Para configurar automaticamente faça o login na conta da AWS indicada pelo Professor e acesse o pefil "DeployEnvironment", e em seguida clique no link abaixo para disparar o template de automação:
 
-[![cf-template](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=sandbox&templateURL=https://s3.us-east-1.amazonaws.com/cf-templates-fiaplabs-automation/cloud9-ide-master.template.yaml)
+[![cf-template](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=sandbox&templateURL=https://s3.us-east-1.amazonaws.com/cf-templates-fiaplabs-automation/cloud9-ide-with-ec2-instance-terminate.template.yaml)
 
-A configuração aplicada neste lab utiliza o template de [cloudformation disponível nesta documentação](https://aws-quickstart.s3.amazonaws.com/quickstart-cloud9-ide/doc/aws-cloud9-cloud-based-ide.pdf)
-
-1.2. Para melhorar o processo de Gestão destas contas utilizaremos um template para a remocão dinâmica das arquiteturas entregues durante os laboratórios, para aplicar clique no link abaixo:
-
-[![cf-template](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=T800&templateURL=https://s3.us-east-1.amazonaws.com/cf-templates-fiaplabs-automation/ec2-instance-terminate.template.yaml)
-
+Um exemplo mais complexo com configuração de vpc dentro do processo pode ser consultado neste [template de cloudformation](https://aws-quickstart.s3.amazonaws.com/quickstart-cloud9-ide/doc/aws-cloud9-cloud-based-ide.pdf)
 
 ---
 

@@ -86,13 +86,19 @@ cat <<EOF > webserver-playbook.yml
         state: started
         enabled: yes
 
-
+EOF
 ```
 
 1.2.6 Após a alteração execute o playbook para gerenciar a configuração na instância criada na etapa anterior:
 
 ```sh
 ansible-playbook webserver-playbook.yml -i hosts -v
+```
+
+1.2.7 Após a execução acesse o end. publico da instância e verifique se o nginx foi instalado:
+
+```sh
+aws ec2 describe-instances   --filters "Name=tag:env,Values=lab" --query 'Reservations[].Instances[].PublicIpAddress' --output text
 ```
 
 Existe uma documentação bem completa sobre boas práticas para a estruturar automação em ansible disponível na URL [https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices](https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html#best-practices);
@@ -150,11 +156,13 @@ ansible-playbook webserver-playbook.yml -i inventory_aws_ec2.yml -v
 O arquivo ec2-create.yml possui um exemplo de um playbook usando ansible para provisionar uma instância na AWS utilizando informações extraídas da VPC, para execução deste teste no ambiente configurado em aula configure um ambiente de provisionamento usando o Cloud9 de acordo com as [etapas documentadas neste repositório](https://github.com/fiapdevops/automation/tree/main/cloud9) e em seguida siga as seguintes etapas:
 
 
-3.1 Dentro do diretório automation/ansible (Uma cópia deste repositório) execute:
+3.1 Faça uma cópia do reposit'rio de exemplo [automation/ansible](https://github.com/FiapDevOps/automation/tree/main)
 
 ```sh
-cd ~/environment/automation/ansible
-ansible-playbook ec2.yml -v
+cd ~/environment
+git clone https://github.com/FiapDevOps/automation
+cd automation/ansible
+ansible-playbook create-ec2-playbook.yml -e aws_region=us-east-1 -v
 ```
 
 > As etapas para a instalação do ansible estão documentadas na página [Installing Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible), para o nosso ambiente este processo já foi executado durante a configuração do Cloud9;
