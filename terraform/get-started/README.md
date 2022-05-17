@@ -47,7 +47,6 @@ resource "aws_instance" "app_server" {
   ami           = "ami-0ecb01759a1945ea3"
   instance_type = "t2.micro"
   key_name      = "id_lab"
-  subnet_id     = "my-subnet-id"
 
   tags = {
     Name = "ExampleAppServerInstance"
