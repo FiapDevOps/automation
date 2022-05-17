@@ -1,0 +1,36 @@
+# Webserver Playbook
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_key_module.html
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html#ansible-collections-ansible-builtin-apt-module
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+
+
+- hosts: webserver
+  become: yes
+  user: ubuntu
+
+  tasks:
+    - name: Webserver | Add nginx apt signing key
+      ansible.builtin.apt_key:
+        url: "https://nginx.org/keys/nginx_signing.key"
+        state: present
+      
+    - name: Webserver | Add official nginx repository
+      ansible.builtin.apt_repository:
+        repo: 'deb http://nginx.org/packages/ubuntu/ focal nginx'
+
+    - name: Webserver | Update repositories cache and install nginx
+      apt:
+        name: nginx
+        update_cache: yes
+
+      notify:
+        - Webserver | Restart nginx
+
+  handlers:
+    - name: Webserver | Restart nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: yes
