@@ -1,4 +1,4 @@
-# DEVOPS Enginnering
+# DEVOPS Engineering
 
 Nesta configuração você fará a preparação da instância que utilizaremos para os laboratórios envolvendo o ambiente AWS;
 
