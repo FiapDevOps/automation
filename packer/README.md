@@ -48,7 +48,7 @@ source "amazon-ebs" "ubuntu" {
 }
 
 build {
-  name = "docker-compose-image"
+  name = "learn-packer-linux-ubuntu-docker"
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
