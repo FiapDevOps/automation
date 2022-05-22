@@ -9,8 +9,8 @@ packer {
 
 source "amazon-ebs" "ubuntu" {
   ami_name      = "learn-packer-linux-ubuntu-docker"
-  instance_type = "t2.micro"
-  region        = "us-east-2"
+  instance_type = "t3.medium"
+  region        = "us-west-2"
   source_ami_filter {
     filters = {
       name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
@@ -24,7 +24,7 @@ source "amazon-ebs" "ubuntu" {
 }
 
 build {
-  name = "learn-packer"
+  name = "docker-compose-image"
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
