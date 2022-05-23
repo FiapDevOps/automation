@@ -115,7 +115,7 @@ aws ec2 run-instances --image-id $IMAGE_ID \
     'ResourceType=instance,Tags=[{Key=env,Value=lab},{Key=imutable,Value=true}]'
 ```
 
-2.3 Identifique a instância e utilize o endereço privado para acessar via SSH e verificar se o docker-compose foi instalado:
+2.3 Identifique a instância e utilize o endereço privado para acessar via SSH e verifique se o docker-compose foi instalado:
 
 ```sh
 TARGET=$(aws ec2 describe-instances     \
@@ -124,14 +124,6 @@ TARGET=$(aws ec2 describe-instances     \
    --output text)
 
 ssh -l ubuntu $TARGET docker-compose --version
-```
-
-2.4 Para testar o docker compose ocmo alternativa para a altomação de containers em docker criaremos nosso primeiro template
-
-2.5 Acess a instância e crie um diretório para o novo template:
-
-```sh
-ssh -l ubuntu $TARGET
 ```
 
 ---
