@@ -89,12 +89,49 @@ packer validate .
 packer build aws-ubuntu-docker-compose.pkr.hcl
 ```
 
-1.6. Após o processo verifique se a imagem foi criada na [página de AMI da AWS](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Images:visibility=owned-by-me;search=learn-packer-linux-aws;sort=name);
+1.6. Após o processo verifique se a imagem foi criada na [página de AMI da AWS](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Images:visibility=owned-by-me;search=learn-packer-linux-ubuntu-docker;sort=name);
 
-1.7. É possível executar esta verificação usando o cliente de AWS:
+1.7. Também é possível identificar a imagem criada utilizando o cliente de linha d comando:
 
 ```sh
-aws list-images
+aws ec2 describe-images --owners self
+```
+
+# Testando a imagem gerada
+
+2.1 Criaremos uma instancia com base na imagem criada via packer, para isso primeiro identifique o ID da imagem:
+
+```sh
+export IMAGE_ID=$(aws ec2 describe-images --owners self --query "Images[].ImageId" --output text)
+echo $IMAGE_ID
+```
+
+2.2 Com o Id da imagem dispare a criação de uma nova instância:
+
+```sh
+aws ec2 run-instances --image-id $IMAGE_ID \
+    --count 1 --instance-type t3.medium --key-name id_lab \
+    --tag-specifications \
+    'ResourceType=instance,Tags=[{Key=env,Value=lab},{Key=imutable,Value=true}]'
+```
+
+2.3 Identifique a instância e utilize o endereço privado para acessar via SSH e verificar se o docker-compose foi instalado:
+
+```sh
+TARGET=$(aws ec2 describe-instances     \
+   --filters "Name=tag-value,Values=lab"  "Name=instance-state-name,Values=running" \
+   --query 'Reservations[*].Instances[*].{Instance:PrivateIpAddress}' \
+   --output text)
+
+ssh -l ubuntu $TARGET docker-compose --version
+```
+
+2.4 Para testar o docker compose ocmo alternativa para a altomação de containers em docker criaremos nosso primeiro template
+
+2.5 Acess a instância e crie um diretório para o novo template:
+
+```sh
+ssh -l ubuntu $TARGET
 ```
 
 ---
