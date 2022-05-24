@@ -21,6 +21,8 @@ aws ec2 describe-subnets --query  'Subnets[].[VpcId, AvailabilityZone, CidrBlock
 1.3. Acesse o diretório automation/terraform/network e inicialize o serviço:
 
 ```sh
+cd ~/environment
+git clone https://github.com/FiapDevOps/automation
 cd $HOME/environment/automation/terraform/network
 terraform init
 ```
