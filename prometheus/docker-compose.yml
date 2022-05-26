@@ -8,16 +8,19 @@ services:
       - PORT=8080
     ports:
       - 8080:8080
+    restart: unless-stopped
     networks:
        monitoring:
        
   prometheus:
-    image: prom/prometheus:v2.33.3
+    image: prom/prometheus:v2.35.0
     volumes:
+      - prometheus_data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./rules.yml:/etc/prometheus/rules.yml
     ports:
       - 80:9090
+    restart: unless-stopped
     networks:
        monitoring:
 
@@ -37,6 +40,26 @@ services:
     networks:
        monitoring:
 
+  grafana:
+    image: grafana/grafana:8.4.5
+    ports:
+      - 9100:9100
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+       monitoring:
+
 networks:
   monitoring:
      name: monitoring
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}

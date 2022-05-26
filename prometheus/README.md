@@ -12,16 +12,24 @@ O prometheus é uma plataforma de monitoração modular baseada em uma linguagem
 1.1. Neste cenário usaremos um bucket remoto para armazenar e posteriormente recuperar o estado da automação, para isso execute:
 
 ```sh
-aws s3api create-bucket --bucket terraform-$C9_PID --region us-east-1 
+aws s3api create-bucket --bucket terraform-bucket-$C9_PID \
+        --region us-west-2 \
+        --create-bucket-configuration LocationConstraint=us-west-2
 ```
 
-1.2. Com base no resultado do comando anterior utilize o nome do bucket para configurar o backend do terraform na automação:
+1.2. Caso ainda não possua, faça uma cópia do nosso repositório de exemplos:
 
 ```sh
-cd $HOME/environment/automation/prometheus/iac
+cd ~/environment
+git clone https://github.com/FiapDevOps/automation
+cd automation/prometheus/iac
+```
 
-# Substitua a linha abaixo pelo bucket identificado no STDOUT do comando anterior
-sed -i s/mybucket/terraform-xxxxxxxxxxxxxxxxxxxxxxx/g main.tf
+1.3. Consule e utilize o nome do bucket para configurar o backend do terraform na automação:
+
+```sh
+export BUCKET_NAME=$(aws s3api list-buckets --query "Buckets[*].Name" --output json  | jq -r -c '.[]  | select(. | contains("terraform-bucket"))')
+sed -i s/mybucket/$BUCKET_NAME/g main.tf
 ```
 
 1.3. Inicie o terraform:
@@ -41,10 +49,11 @@ terraform apply
 
 | descrição                       | path                             |
 |---------------------------------|----------------------------------|
-| Interface do prometheus                     | \<prometheus_public_ip>:80                             |
-| Acesso na App de testes                     | \<prometheus_public_ip>:8080                           |
-| Scrape de métricas                          | \<prometheus_public_ip>:8080/metrics                   |
-| Scrape de métricas do sistema operacional   | \<prometheus_public_ip>:9100/metrics                   |
+| Interface do prometheus                      | \<prometheus_public_ip>:80                             |
+| Intarface do Grafana (Usuário e senha admin) | \<prometheus_public_ip>:3000                           |
+| Acesso na App de testes                      | \<prometheus_public_ip>:8080                           |
+| Scrape de métricas                           | \<prometheus_public_ip>:8080/metrics                   |
+| Scrape de métricas do sistema operacional    | \<prometheus_public_ip>:9100/metrics                   |
 
 
 ---
@@ -72,13 +81,21 @@ Para gerar a app será utilizado uma imagem criada com base neste build disponí
 
 Para monitorar o uso de recursos usando timeseries, no caso do prometheus o node-exporter é geralmente escolha para fornecimento dos dados, ele foi implementado em nosso ambiente com scrape de metricas para a porta 9100 na path /metrics;
 
-Um  exemplo simples seria uma consulta direta aos pontos usando a função rate do prometheus para obter a média:
+Um  exemplo simples seria uma consulta direta aos pontos usando a função [rate](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) do prometheus para obter a média:
 
 ```sh
 rate(node_cpu_seconds_total{mode="system"}[1m])
 ```
 
-Outra possibilidade agora para avaliação sobre o uso de memória seria o ponto node_memory_MemAvailable_bytes:
+> Esta consulta está utilizando métricas sobre o uso de CPU estraídas pelo componente [node-exporter](https://github.com/prometheus/node_exporter) do diretório /proc/stat do sistema operacional e resumidamente trará informações sobre quantos segundos cada cpu gastou em cada tipo de tarefa;
+
+Podemos agregar essa métrica para obter o valor geral em todas as CPUs da máquina:
+
+```sh
+sum by (mode, instance) (rate(node_cpu_seconds_total[1m]))
+```
+
+Falando na avaliação sobre o uso de memória poderiamos utilizar o ponto node_memory_MemAvailable_bytes:
 
 ```sh
 node_memory_MemAvailable_bytes/1024/1024
@@ -86,13 +103,32 @@ node_memory_MemAvailable_bytes/1024/1024
 
 > Como o valor original foi configurado na métrica em bytes existe um processo de conversão, por isso a divisão por 1024 duas vezes;
 
-Toda métrica de timeseries é baseada em uma informação de um momento no tempo, por isso em casos onde o histórico é importante é comum transformar esses dados em gráficos, mas é possível executar consultas usando funções para tratar esses dados como o [offset](https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier);
+
+E fechando este primeiro ciclo considere a monitoração sobre o uso de recursos de disco no filesystem, a métrica **node_filesystem_size_bytes** agrega os pontos sobre o tamanho do filesystem aplicado ao disco, portanto:
 
 ```sh
-node_memory_MemAvailable_bytes/1024/1024 offset 10m
+node_filesystem_size_bytes/1024
 ```
 
-Outros exemplo interessantes podem ser consultados nos endereços abaixo:
+> o valor obtido será o mesmo que o dado capturado pelo comando [df](https://man7.org/linux/man-pages/man1/df.1p.html);
+
+E se precisarmos melhorar essa informação trazendo apenas o espaço livre disponível? Poderiamos utilizar a métrica **node_filesystem_avail_bytes** cujo nome também é bem auto-explicativo:
+
+```sh
+node_filesystem_avail_bytes/1024
+```
+
+Finalmente uma operação mateática entre esses dois pontos daria a porcentagem de uso:
+
+```sh
+100 - (node_filesystem_avail_bytes/node_filesystem_size_bytes * 100)
+```
+
+> Você pode executar um teste alterando essa alocação de recursos com o comando fallocate, por exemplo "fallocate -l 400M file.txt" e voltando ao painel para averiguar a mudança do ponto no prometheus;
+
+---
+
+Outros exemplos interessantes podem ser consultados nos endereços abaixo:
 
 Métricas sobre o uso de CPU: [Understanding Machine CPU usage](https://www.robustperception.io/understanding-machine-cpu-usage)
 
@@ -123,8 +159,6 @@ rate(flask_http_request_total{status=~"5.."}[5m])
 ---
 
 ## Disponibilidade e Latência
-
-Este exemplo utiliza um formato similar ao anterior porém adicionando um calculo matemático no cenário:
 
 O objetivo é calcular a taxa de sucesso das requisições HTTP, com base no status code diferente de 5xx nos últimos 10 minutos, esse calculo assume que qualquer requisição cujo retorno seja diferente de 5xx é considerada uma requisição bem sucessida:
 
@@ -163,7 +197,7 @@ sum(rate(flask_http_request_duration_seconds_bucket{job="app", le="0.25", status
 sum(rate(flask_http_request_duration_seconds_count{job="app",status!="500"}[5m])) * 100
 ```
 
-ANeste calculo também usamos outra característica do prometheus a função [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) que é um agregador;
+Neste calculo também usamos outra característica do prometheus a função [sum()](https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators) que é um agregador;
 
 ---
 
@@ -171,7 +205,7 @@ ANeste calculo também usamos outra característica do prometheus a função [su
 
 No prometheus a construção de alertas é baseado em consultas usando o PROMQL, para testarmos o conceito execute o seguinte processo:
 
-3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue;
+3.1 A partir do ambiente local acesse remotamente a instancia onde a aplicação foi entregue e utilize o sudo para assumir uma permissão administrativa;
 
 3.2 Verifique que as regras de alerta ficam configuradas no arquivo rules.yml entregue no prometheus usando o docker-compose:
 

@@ -14,13 +14,13 @@ terraform {
   backend "s3" {
     bucket = "mybucket"
     key    = "monitoring"
-    region = "us-east-1"
+    region = "us-west-2"
   }
 }
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
 data "aws_vpc" "default" {
@@ -81,6 +81,14 @@ resource "aws_security_group_rule" "open-port-9100" {
   security_group_id = data.aws_security_group.default.id
 }
 
+resource "aws_security_group_rule" "open-port-3000" {
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = data.aws_security_group.default.id
+}
 
 resource "aws_instance" "monitoring_app" {
     ami                         = data.aws_ami.ubuntu.id
