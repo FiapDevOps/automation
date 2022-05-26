@@ -49,10 +49,11 @@ terraform apply
 
 | descrição                       | path                             |
 |---------------------------------|----------------------------------|
-| Interface do prometheus                     | \<prometheus_public_ip>:80                             |
-| Acesso na App de testes                     | \<prometheus_public_ip>:8080                           |
-| Scrape de métricas                          | \<prometheus_public_ip>:8080/metrics                   |
-| Scrape de métricas do sistema operacional   | \<prometheus_public_ip>:9100/metrics                   |
+| Interface do prometheus                      | \<prometheus_public_ip>:80                             |
+| Intarface do Grafana (Usuário e senha admin) | \<prometheus_public_ip>:3000                           |
+| Acesso na App de testes                      | \<prometheus_public_ip>:8080                           |
+| Scrape de métricas                           | \<prometheus_public_ip>:8080/metrics                   |
+| Scrape de métricas do sistema operacional    | \<prometheus_public_ip>:9100/metrics                   |
 
 
 ---
