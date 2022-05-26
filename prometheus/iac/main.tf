@@ -81,6 +81,14 @@ resource "aws_security_group_rule" "open-port-9100" {
   security_group_id = data.aws_security_group.default.id
 }
 
+resource "aws_security_group_rule" "open-port-3000" {
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = data.aws_security_group.default.id
+}
 
 resource "aws_instance" "monitoring_app" {
     ami                         = data.aws_ami.ubuntu.id
