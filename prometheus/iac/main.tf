@@ -14,13 +14,13 @@ terraform {
   backend "s3" {
     bucket = "mybucket"
     key    = "monitoring"
-    region = "us-east-1"
+    region = "us-west-2"
   }
 }
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
 data "aws_vpc" "default" {
