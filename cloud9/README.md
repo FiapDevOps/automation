@@ -20,15 +20,15 @@ Nesta etapa faremos algumas configurações na instância de onde partirá as au
 
 ```sh
 cd ~/environment
-git clone https://github.com/fiapdevops/cloud9
+git clone https://github.com/fiapdevops/automation
 ```
 
 2.2. Execute o script de instalção das ferramentas que serão usadas durante os laboratórios:
 
 ```sh
-chmod +x ~/environment/cloud9/scripts/*.sh
+chmod +x ~/environment/automation/scripts/*.sh
 
-~/environment/cloud9/scripts/config.sh
+~/environment/automation/scripts/config.sh
 ```
 
 ---
