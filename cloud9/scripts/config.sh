@@ -5,7 +5,7 @@
 
 resize () {
 # Resizing para o disco local do ambiente:
-sh $HOME/environment/cloud9/scripts/resize.sh 20 > /dev/null
+sh $HOME/environment/automation/cloud9/scripts/resize.sh 20 > /dev/null
 }
 
 configure_deps () {
