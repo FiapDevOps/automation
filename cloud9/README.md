@@ -1,4 +1,4 @@
-# DEVOPS Engineering
+# Fiaplabs
 
 Nesta configuração você fará a preparação da instância que utilizaremos para os laboratórios envolvendo o ambiente AWS;
 
@@ -26,14 +26,14 @@ git clone https://github.com/fiapdevops/automation
 2.2. Execute o script de instalção das ferramentas que serão usadas durante os laboratórios:
 
 ```sh
-chmod +x ~/environment/automation/scripts/*.sh
+chmod +x ~/environment/automation/cloud9/scripts/*.sh
 
-~/environment/automation/scripts/config.sh
+~/environment/automation/cloud9/scripts/config.sh
 ```
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
