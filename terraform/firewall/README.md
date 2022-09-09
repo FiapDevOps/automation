@@ -39,7 +39,14 @@ aws ec2 describe-security-groups  --filters Name=tag:env,Values=lab --output jso
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+
+Para finalizar siga para a parte 4 nela adicionaremos um exemplo de workload a essa infraestrutura
+
+[>>> PARTE 4](https://github.com/FiapDevOps/automation/tree/main/terraform/instances)
+
+---
+
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
