@@ -60,7 +60,13 @@ aws ec2 describe-subnets --query  'Subnets[].[VpcId, AvailabilityZone, CidrBlock
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+Para continuar siga para a parte 3 onde iremos adicionar grupos de segurança nesta nova rede
+
+[>>> PARTE 3](https://github.com/FiapDevOps/automation/tree/main/terraform/firewall)
+
+---
+
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
