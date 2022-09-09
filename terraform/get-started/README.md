@@ -112,7 +112,13 @@ ssh -l ubuntu $TARGET
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+Para continuar siga para a parte 2 com um cenário mais complexo envolvendo criação de rede
+
+[>>> PARTE 2](https://github.com/FiapDevOps/automation/tree/main/terraform/network)
+
+---
+
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
