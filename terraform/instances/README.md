@@ -47,6 +47,14 @@ terraform state list
 terraform destroy
 ```
 
+3.8. Finalize destruindo os outros recursos criados:
+
+```sh
+terraform -chdir=$HOME/environment/automation/terraform/firewall/ destroy -auto-approve
+terraform -chdir=$HOME/environment/automation/terraform/network/ destroy -auto-approve
+terraform -chdir=$HOME/environment/automation/terraform/get-started/ destroy -auto-approve
+```
+
 ---
 
 ##### Fiap - MBA
