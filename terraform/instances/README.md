@@ -29,9 +29,10 @@ aws ec2 describe-instances  --filters Name=tag:env,Values=lab --output json
 3.5. Com ajuda do [cloud-init](https://cloud-init.io/) entregue no diretório templates as instancias foram lançadas com um setup inicial de uma aplicação web, consulte o endereço ip publico e tente o acesso pelo navegador:
 
 ```sh
-aws ec2 describe-instances  --filters Name=tag:env,Values=lab \
+aws ec2 describe-instances  --filters Name=tag:env,Values=lab Name=tag:tier,Values=public \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     --output text 
+
 ```
 
 3.6. Para finalizar nosso exemplo utilizaremos o terraform para destruir o setup criado, isso é possível pois como solução de provisionamento o terraform guarda o [estado dos recursos gerenciados](https://www.terraform.io/language/state), essa informação deve preferencialmente ser armazenada em um bucket ou similar pois é utilizada para recuperar o estado atual dos objetos para manipulaçãoou remoção:
@@ -48,7 +49,7 @@ terraform destroy
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
