@@ -22,7 +22,7 @@ Neste laboratório o terraform fica responsável por gerenciar os seguintes iten
 
 ---
 
-##### Fiap - MBA Cyber Security Forensics, Ethical Hacking & DevSecOps
+##### Fiap - MBA
 profhelder.pereira@fiap.com.br
 
 **Free Software, Hell Yeah!**
