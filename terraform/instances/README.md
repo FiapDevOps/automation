@@ -52,7 +52,6 @@ terraform destroy
 ```sh
 terraform -chdir=$HOME/environment/automation/terraform/firewall/ destroy -auto-approve
 terraform -chdir=$HOME/environment/automation/terraform/network/ destroy -auto-approve
-terraform -chdir=$HOME/environment/automation/terraform/get-started/ destroy -auto-approve
 ```
 
 ---
