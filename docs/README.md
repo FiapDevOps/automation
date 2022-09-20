@@ -88,7 +88,7 @@ Mais detalhes sobre a arquitetura do Istio podem ser consultados na documentaç�
 
 Para execução dos testes será feito a entrega da App Bookinfo no namespace de mesmo nome, essa aplicação possui o layout descrito no desenho de arquitetura abaixo:
 
-![alt tag](https://github.com/FiapDevOps/automation/blob/dcc279337cce26af494f562c9c1fbeef04de413c/eks-canary/images/istio_bookinfo_architecture.png)
+![alt tag](https://raw.githubusercontent.com/fiapdevops/automation/main/eks-canary/images/istio_bookinfo_architecture.png)
 
 A app Bookinfo é dividida em quatro microsserviços separados:
 
