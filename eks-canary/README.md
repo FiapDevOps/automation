@@ -65,20 +65,10 @@ eksctl create cluster -f eks-eksctl.yaml
 1.5. Atualize o arquivo kubeconfig para interagir com seu cluster:
 
 ```sh
-aws eks update-kubeconfig --name eks-${EKS_PROJECT} --region ${AWS_REGION}
+aws eks update-kubeconfig --name ${EKS_CLUSTER} --region ${AWS_REGION}
 ```
 
-1.6. Ao criar o cluster foi criado uma Role que será utilizada para autorizar alguns processos de administração, para explorar essa role identifique o nome dentro da stack de cloud formation que gerou o cluster e exporte como variável:
-
-```sh
-
-STACK_NAME=$(eksctl get nodegroup --cluster ${EKS_CLUSTER} -o json | jq -r '.[].StackName')
-
-ROLE_NAME=$(aws cloudformation describe-stack-resources --stack-name $STACK_NAME | jq -r '.StackResources[] | select(.ResourceType=="AWS::IAM::Role") | .PhysicalResourceId')
-echo "export ROLE_NAME=${ROLE_NAME}" | tee -a ~/.bash_profile
-```
-
-1.7. Fechando o processo de criação valide o acesso ao cluster via kubectl:
+1.6. Fechando o processo de criação valide o acesso ao cluster via kubectl:
 
 ```sh
 kubectl get nodes
@@ -98,7 +88,7 @@ Mais detalhes sobre a arquitetura do Istio podem ser consultados na documentaç�
 
 Para execução dos testes será feito a entrega da App Bookinfo no namespace de mesmo nome, essa aplicação possui o layout descrito no desenho de arquitetura abaixo:
 
-![alt tag](https://github.com/FiapDevOps/observability/raw/32b2b1479a75027dc738f6071411d967be7b6092/img-src/istio_bookinfo_architecture.png)
+![alt tag](https://github.com/FiapDevOps/automation/blob/dcc279337cce26af494f562c9c1fbeef04de413c/eks-canary/images/istio_bookinfo_architecture.png)
 
 A app Bookinfo é dividida em quatro microsserviços separados:
 
