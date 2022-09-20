@@ -109,11 +109,11 @@ Etapas de construção:
 
 | Roteiro       | Descrição |
 |-------------------|-----------|
-| [Introdução](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/introduction/) |
-| [Download do CLI](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/download/) |
-| [Instalação do Istio](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/install/) |
-| [Deploy](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/deploy/) |
-| [Roteamento de Tráfego](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/routing/) |
+| [Introdução](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/introduction/) | Documentação base sobre o uso do Istio para Service Mesh | 
+| [Download do CLI](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/download/) | Instalação do cliente de linha de comando | 
+| [Instalação do Istio](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/install/) | Instalação do Istio no cluster eks | 
+| [Deploy](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/deploy/) | Entrega da aplicação de testes Bookinfo |
+| [Roteamento de Tráfego](https://www.eksworkshop.com/advanced/310_servicemesh_with_istio/routing/) | Validar estratégias de roteamento usando Canary |
 
 ---
 
