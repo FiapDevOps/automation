@@ -13,6 +13,7 @@ Repositório com as bases no conteúdo da disciplina "Server Managing, Monitorin
 | [Packer](https://github.com/fiapdevops/automation/tree/main/packer) | Teste usando o conceito de Infraestrutura Imutável e apresentando o docker compose; |
 | [Prometheus](https://github.com/fiapdevops/automation/tree/main/prometheus) | Deploy de prometheus para apresentar a monitoração baseada em Timeseries; |
 | [Zabbix](https://github.com/fiapdevops/automation/tree/main/zabbix) | Laboratório com Zabbix como feramenta para monitoração de recursos e check ativo; |
+| [EKS Canary](https://github.com/fiapdevops/automation/tree/main/eks-canary) | Roteiro usando o workshop da AWS sobre EKS para exemplificar um modelo Canary; |
 
 
 
