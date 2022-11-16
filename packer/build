@@ -1,0 +1,74 @@
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+     # key: "value"
+  #parameter-store:
+     # key: "value"
+     # key: "value"
+  #secrets-manager:
+     # key: secret-id:json-key:version-stage:version-id
+     # key: secret-id:json-key:version-stage:version-id
+  #exported-variables:
+     # - variable
+     # - variable
+  #git-credential-helper: yes
+#batch:
+  #fast-fail: true
+  #build-list:
+  #build-matrix:
+  #build-graph:
+phases:
+  #install:
+    #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
+    #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
+    #runtime-versions:
+      # name: version
+      # name: version
+    #commands:
+      # - command
+      # - command
+  pre_build:
+    commands:
+      - echo "Installing HashiCorp Packer..."
+      - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.8.4/packer_1.8.4_netbsd_amd64.zip && unzip packer.zip
+      - echo "Installing jq..."
+      - curl -qL -o jq https://stedolan.github.io/jq/download/linux64/jq && chmod +x ./jq
+      - echo "aws-learn-packer-linux-ubuntu-sample.yaml"
+      - ./packer aws-learn-packer-linux-ubuntu-sample.yaml
+      # - command
+  build:
+    commands:
+      ### HashiCorp Packer cannot currently obtain the AWS CodeBuild-assigned role and its credentials
+      ### Manually capture and configure the AWS CLI to provide HashiCorp Packer with AWS credentials
+      ### More info here: https://github.com/mitchellh/packer/issues/4279
+      - echo "Configuring AWS credentials"
+      - curl -qL -o aws_credentials.json http://169.254.170.2/$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI > aws_credentials.json
+      - aws configure set region $AWS_REGION
+      - aws configure set aws_access_key_id `./jq -r '.AccessKeyId' aws_credentials.json`
+      - aws configure set aws_secret_access_key `./jq -r '.SecretAccessKey' aws_credentials.json`
+      - aws configure set aws_session_token `./jq -r '.Token' aws_credentials.json`
+      - echo "Building HashiCorp Packer template,  aws-learn-packer-linux-ubuntu-sample.yml"
+      - ./packer aws-learn-packer-linux-ubuntu-sample.yaml
+  post_build:
+    commands:
+      - echo "HashiCorp Packer build completed on `date`"
+#reports:
+  #report-name-or-arn:
+    #files:
+      # - location
+      # - location
+    #base-directory: location
+    #discard-paths: yes
+    #file-format: JunitXml | CucumberJson
+#artifacts:
+  #files:
+    # - location
+    # - location
+  #name: $(date +%Y-%m-%d)
+  #discard-paths: yes
+  #base-directory: location
+#cache:
+  #paths:
+    # - paths
