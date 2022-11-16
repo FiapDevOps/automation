@@ -20,7 +20,7 @@ cd ~/environment/iac/packer
 1.2. Dentro do diretório crie um arquivo de template:
 
 ```sh
-cat <<EOF > aws-ubuntu-docker-compose.pkr.hcl
+cat <<EOF > learn-packer-linux-ubuntu-sample.pkr.hcl
 
 packer {
   required_plugins {
@@ -32,9 +32,9 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "learn-packer-linux-ubuntu-docker"
+  ami_name      = "learn-packer-linux-ubuntu-sample"
   instance_type = "t3.medium"
-  region        = "us-west-2"
+  region        = "us-east-1"
   source_ami_filter {
     filters = {
       name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
@@ -48,21 +48,16 @@ source "amazon-ebs" "ubuntu" {
 }
 
 build {
-  name = "learn-packer-linux-ubuntu-docker"
+  name = "learn-packer-linux-ubuntu-sample"
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
   provisioner "shell" {
     inline = [
       "sleep 15",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-      "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
       "sudo apt-get update",
-      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io",
-      "sudo usermod -aG docker ubuntu",
-      "sudo systemctl enable docker",
-      "sudo curl -L \"https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose",
-      "sudo chmod +x /usr/local/bin/docker-compose",
+      "sudo apt-get install nginx -y",
+      "sudo systemctl enable nginx",
     ]
   }
 }
@@ -86,10 +81,10 @@ packer validate .
 1.5. Execute o build utilizando o packer:
 
 ```sh
-packer build aws-ubuntu-docker-compose.pkr.hcl
+packer build learn-packer-linux-ubuntu-sample.pkr.hcl
 ```
 
-1.6. Após o processo verifique se a imagem foi criada na [página de AMI da AWS](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Images:visibility=owned-by-me;search=learn-packer-linux-ubuntu-docker;sort=name);
+1.6. Após o processo verifique se a imagem foi criada na [página de AMI da AWS](https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-west-2#Images:visibility=owned-by-me;search=learn-packer;sort=name);
 
 1.7. Também é possível identificar a imagem criada utilizando o cliente de linha d comando:
 
@@ -113,17 +108,6 @@ aws ec2 run-instances --image-id $IMAGE_ID \
     --count 1 --instance-type t3.medium --key-name id_lab \
     --tag-specifications \
     'ResourceType=instance,Tags=[{Key=env,Value=lab},{Key=imutable,Value=true}]'
-```
-
-2.3 Identifique a instância e utilize o endereço privado para acessar via SSH e verifique se o docker-compose foi instalado:
-
-```sh
-TARGET=$(aws ec2 describe-instances     \
-   --filters "Name=tag-value,Values=lab"  "Name=instance-state-name,Values=running" \
-   --query 'Reservations[*].Instances[*].{Instance:PrivateIpAddress}' \
-   --output text)
-
-ssh -l ubuntu $TARGET docker-compose --version
 ```
 
 ---
