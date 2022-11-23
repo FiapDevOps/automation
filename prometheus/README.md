@@ -35,6 +35,7 @@ sed -i s/mybucket/$BUCKET_NAME/g main.tf
 1.3. Inicie o terraform:
 
 ```sh
+cd automation/prometheus/iac
 terraform init
 terraform plan
 ```
