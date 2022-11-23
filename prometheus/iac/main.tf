@@ -11,16 +11,16 @@ terraform {
       version = "~> 3.0"
     }
   }
-  backend "s3" {
-    bucket = "mybucket"
-    key    = "monitoring"
-    region = "us-west-2"
-  }
+#  backend "s3" {
+#    bucket = "mybucket"
+#    key    = "monitoring"
+#    region = "us-east-1"
+#  }
 }
 
 # Configurando o cloud provider
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 data "aws_vpc" "default" {
@@ -92,7 +92,7 @@ resource "aws_security_group_rule" "open-port-3000" {
 
 resource "aws_instance" "monitoring_app" {
     ami                         = data.aws_ami.ubuntu.id
-    instance_type               = "t3a.medium"
+    instance_type               = "t3.medium"
     associate_public_ip_address = true    
     user_data                   = "${file("templates/prometheus.yaml")}"
     vpc_security_group_ids      = [data.aws_security_group.default.id]
@@ -107,7 +107,7 @@ resource "aws_instance" "monitoring_app" {
 
 resource "aws_instance" "single_app" {
     ami                         = data.aws_ami.ubuntu.id
-    instance_type               = "t3a.medium"
+    instance_type               = "t3.medium"
     associate_public_ip_address = true    
     user_data                   = "${file("templates/mediawiki.yaml")}"
     vpc_security_group_ids      = [data.aws_security_group.default.id]
